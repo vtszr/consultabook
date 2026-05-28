@@ -744,7 +744,18 @@ function getSlots(date){
   var bk=appts.filter(function(a){return a.pid===sp.id&&a.date===key;}).map(function(a){return a.time;});
   var all=[];
   sess.forEach(function(s){all=all.concat(genSlots(s.start,s.end));});
-  return all.map(function(s){return {time:s.time,label:s.label,booked:bk.indexOf(s.time)>=0};});
+  var now=new Date();
+  return all.map(function(s){
+    var isPastSlot=false;
+    if(isT(date)){
+      // Блокирај прошле термине данас
+      var parts=s.time.split(':');
+      var slotTime=new Date();
+      slotTime.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
+      isPastSlot=slotTime<=now;
+    }
+    return {time:s.time,label:s.label,booked:bk.indexOf(s.time)>=0||isPastSlot};
+  });
 }
 function hasAvail(date){ return getSlots(date).some(function(s){return !s.booked;}); }
 function isProfDay(date){ return sp&&sp.sessions.some(function(s){return s.day===date.getDay();}); }
@@ -1173,7 +1184,7 @@ function renderAppts(id,f){
     return '<div class="acard" style="'+(past?'opacity:.65;':'')+'">'
       +'<div class="at"><div class="tm">'+a.label.split('–')[0].split('-')[0].trim()+'</div><div class="dt">'+dstr+'</div></div>'
       +'<div class="adv"></div>'
-      +'<div class="ai"><div class="ai-n">'+a.name+' <span style="color:var(--text3);font-weight:400;font-size:.68rem;">'+a.idx+'</span>'+(a.email?'<a href="mailto:'+a.email+'" style="margin-left:6px;font-size:.65rem;color:var(--accent);text-decoration:none;pointer-events:all !important;cursor:pointer;-webkit-user-select:text;user-select:text;">✉ '+a.email+'</a>':'')+'</div>'
+      +'<div class="ai"><div class="ai-n">'+a.name+' <span style="color:var(--text3);font-weight:400;font-size:.68rem;">'+a.idx+'</span>'+(a.email?' <span style="font-size:.65rem;color:var(--accent);">✉ '+a.email+'</span>':'')+'</div>'
       +'<div class="ai-t">'+a.topic+(a.year?' · '+a.year:'')+expBadge+'</div></div>'
       +badge
       +'<button class="delbtn" data-aid="'+a.id+'">'

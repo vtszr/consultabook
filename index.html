@@ -251,10 +251,10 @@ body.light .fg select option{background:#fff;}
 .dept-title{font-family:'Orbitron',monospace;font-size:.82rem;font-weight:700;color:var(--text);}
 .dept-count{font-size:.72rem;color:var(--text3);margin-left:auto;}
 .dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.65rem;}
-.mailbtn{width:100%;padding:.6rem;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--rsm);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;transition:all .2s;margin-top:.45rem;}
+/*.mailbtn{width:100%;padding:.6rem;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--rsm);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;transition:all .2s;margin-top:.45rem;pointer-events:all;cursor:pointer;user-select:none;}
 .mailbtn:hover{border-color:var(--accent);color:var(--accent);}
-.mailbtn svg{width:14px;height:14px;}
-.mailw{display:none;}
+
+
 .exp-badge{display:inline-flex;align-items:center;gap:4px;padding:1px 6px;border-radius:20px;font-size:.62rem;font-weight:800;background:rgba(244,63,94,0.1);color:var(--danger);text-transform:uppercase;letter-spacing:.3px;margin-left:4px;}
 
 /* LOADER */
@@ -341,7 +341,7 @@ body.light .fg select option{background:#fff;}
   .fg label{font-size:.65rem;}
   .fg input,.fg textarea,.fg select{font-size:.82rem;padding:.5rem .72rem;}
   .cbtn{font-size:.85rem;padding:.7rem;}
-  .gcalbtn,.mailbtn{font-size:.78rem;padding:.55rem;}
+  .gcalbtn,/*.mailbtn{font-size:.78rem;padding:.55rem;}
 
   /* Confirmation card */
   .conf-card{padding:.85rem;}
@@ -414,9 +414,10 @@ body.light .fg select option{background:#fff;}
 
 /* Спречи текст курсор свуда */
 *{user-select:none;-webkit-user-select:none;}
+a{pointer-events:all !important;cursor:pointer;}
 input,textarea{user-select:text;-webkit-user-select:text;}
 body{cursor:default;}
-button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sbtn{cursor:pointer;}
+button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sbtn,.mailbtn,.gcalbtn{cursor:pointer;}
 .cday.dis{cursor:not-allowed;}
 .sbtn.bkd{cursor:not-allowed;}
 
@@ -479,6 +480,9 @@ button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sb
 .comment-area.open{display:block;}
 
 .cday.holiday{color:var(--danger)!important;opacity:.4;}
+
+.appt-gcal{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:1px solid var(--border);color:var(--text3);text-decoration:none;transition:all .18s;flex-shrink:0;pointer-events:all;cursor:pointer;}
+.appt-gcal:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow);}
 </style>
 </head>
 <body>
@@ -507,7 +511,7 @@ button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sb
   </div>
   <div class="rtog">
     <button class="rbtn on" id="btn-student">Студент</button>
-    <button class="rbtn" id="btn-professor">Наставник</button>
+    <button class="rbtn" id="btn-professor">Професор</button>
     <button class="rbtn" id="btn-student2">Моје резервације</button>
   </div>
   <div id="fb-status" style="display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--text3);"><div id="fb-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);"></div><span id="fb-label">Повезивање...</span></div>
@@ -575,8 +579,10 @@ button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sb
       <div class="pc">
         <h3>Подаци о студенту</h3>
         <div class="dup-warn" id="dup-warn"></div>
-        <div class="fg"><label>Ime i prezime *</label><input type="text" id="fn" placeholder="нпр. Никола Тесла"></div>
+        <div class="fg"><label>Ime i prezime *</label><input type="text" id="fn" placeholder="нпр. Никола Тесла" lang="sr"></div>
         <div class="fg"><label>Број индекса *</label><input type="text" id="fi" placeholder="нпр. ЕТ-2022-1234"></div>
+        
+        <div class="fg"><label>Мејл адреса <span style="color:var(--text3);font-weight:400;font-size:.85em;">(опционо)</span></label><input type="email" id="fe" placeholder="нпр. nikola@gmail.com"></div>
         <div class="fg"><label>Смер студија</label>
           <select id="fd"><option value="">Изабери смер&hellip;</option><option>Електротехника и рачунарство</option><option>Машинско инжењерство</option><option>Технолошко инжењерство</option><option>Инжењерство заштите на раду</option></select>
         </div>
@@ -589,7 +595,7 @@ button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sb
           <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>Термин потврђен!</h4>
           <div id="ccard-body"></div>
         </div>
-        <div class="mailw" id="mailw"><a class="mailbtn" id="mailbtn" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Пошаљи потврду мејлом</a></div>
+        
         <div class="gcalw" id="gcalw">
           <a class="gcalbtn" id="gcal" href="#" target="_blank">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -608,7 +614,7 @@ button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sb
         <div style="width:72px;height:72px;border-radius:50%;background:#1c2540;border:2px solid rgba(245,185,0,0.28);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;">
           <svg viewBox="0 0 24 24" fill="none" stroke="#f5b900" stroke-width="1.5" width="32" height="32" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
-        <h3>Портал за наставнике</h3>
+        <h3>Портал за професоре</h3>
         <p>Пријавите се да видите своје термине</p>
       </div>
       <div class="login-err" id="login-err">Погрешно корисничко ime или лозинка.</div>
@@ -974,7 +980,6 @@ function openB(id){
   document.getElementById('vlist').style.display='none';
   document.getElementById('vbook').classList.add('on');
   document.getElementById('gcalw').style.display='none';
-  document.getElementById('mailw').style.display='none';
   document.getElementById('ccard').classList.remove('on');
   document.getElementById('dup-warn').classList.remove('on');
   var subj=sp.subject==='—'?'Наставник ВТШ Зрењанин':sp.subject;
@@ -983,7 +988,7 @@ function openB(id){
   updSum();chk();
   setTimeout(function(){renderCal();},10);
   document.getElementById('scont').innerHTML='<p class="no-slot">Прво изаберите датум.</p>';
-  ['fn','fi','ft'].forEach(function(i){document.getElementById(i).value='';});
+  ['fn','fi','fe','ft'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';}); 
   ['fd','fy'].forEach(function(i){document.getElementById(i).value='';});
 }
 
@@ -1075,7 +1080,8 @@ function confirmBook(){
   dupWarn.classList.remove('on');
   var slots=getSlots(sd),sl=slots.find(function(s){return s.time===st;});
   if(!sl||sl.booked){showToast('err','Термин заузет','Изаберите другачији термин.');renderSlots();return;}
-  var appt={id:nid++,pid:sp.id,name:name,idx:idx,dept:dept,year:year,topic:topic||'Општа консултација',date:fmtK(sd),time:st,label:sl.label};
+  var email=document.getElementById('fe')?document.getElementById('fe').value.trim():'';
+  var appt={id:nid++,pid:sp.id,name:name,idx:idx,email:email,dept:dept,year:year,topic:topic||'Општа консултација',date:fmtK(sd),time:st,label:sl.label};
   appts.push(appt);
   saveApptToFirebase(appt);
   var start=new Date(appt.date+'T'+sl.time+':00');
@@ -1084,8 +1090,7 @@ function confirmBook(){
   var fmt=function(d){return d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';};
   document.getElementById('gcal').href='https://www.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Консултације — '+sp.name)+'&dates='+fmt(start)+'/'+fmt(end)+'&details='+encodeURIComponent('Студент: '+name+'\nИндекс: '+idx+'\nТема: '+(topic||'Општа консултација'))+'&location='+encodeURIComponent('ВТШСС у Зрењанину, '+sp.office);
   document.getElementById('gcalw').style.display='block';
-  document.getElementById('mailw').style.display='block';
-  document.getElementById('mailbtn').href=makeMailto(appt,sp,sl);
+
   document.getElementById('ccard-body').innerHTML=
     '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><strong>'+name+'</strong> ('+idx+')</span></div>'+
     '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Наставник: <strong>'+sp.name+'</strong></span></div>'+
@@ -1102,13 +1107,6 @@ function confirmBook(){
   if(loggedProf&&loggedProf.id===sp.id){renderStats(loggedProf.id);renderAppts(loggedProf.id,ptab_);}
 }
 
-function makeMailto(appt,prof,sl){
-  var d=new Date(appt.date+'T00:00:00');
-  var dateStr=d.toLocaleDateString('sr-Latn-RS',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  var subj=encodeURIComponent('Потврда консултације — '+prof.name);
-  var body=encodeURIComponent('Поштовани,\n\nУспешно сте резервисали консултацију:\n\nНаставник: '+prof.name+'\nПредмет: '+prof.subject+'\nДатум: '+dateStr+'\nТермин: '+sl.label+'\nКабинет: '+prof.office+'\nТема: '+appt.topic+'\n\nС поштовањем,\nКонсултаБук — ВТШ Зрењанин');
-  return 'mailto:?subject='+subj+'&body='+body;
-}
 
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
 function doLogin(){
@@ -1175,7 +1173,7 @@ function renderAppts(id,f){
     return '<div class="acard" style="'+(past?'opacity:.65;':'')+'">'
       +'<div class="at"><div class="tm">'+a.label.split('–')[0].split('-')[0].trim()+'</div><div class="dt">'+dstr+'</div></div>'
       +'<div class="adv"></div>'
-      +'<div class="ai"><div class="ai-n">'+a.name+' <span style="color:var(--text3);font-weight:400;font-size:.68rem;">'+a.idx+'</span></div>'
+      +'<div class="ai"><div class="ai-n">'+a.name+' <span style="color:var(--text3);font-weight:400;font-size:.68rem;">'+a.idx+'</span>'+(a.email?'<a href="mailto:'+a.email+'" style="margin-left:6px;font-size:.65rem;color:var(--accent);text-decoration:none;pointer-events:all !important;cursor:pointer;-webkit-user-select:text;user-select:text;">✉ '+a.email+'</a>':'')+'</div>'
       +'<div class="ai-t">'+a.topic+(a.year?' · '+a.year:'')+expBadge+'</div></div>'
       +badge
       +'<button class="delbtn" data-aid="'+a.id+'">'
@@ -1349,7 +1347,7 @@ function searchMyAppts(){
         '<div class="myr-time"><div class="t">'+timePart+'</div><div class="d">'+dstr+'</div></div>'+
         '<div class="myr-div"></div>'+
         '<div class="myr-info">'+
-          '<div class="myr-prof">'+(prof?prof.name:'Наставник')+'</div>'+
+          '<div class="myr-prof">'+(prof?prof.name:'Професор')+'</div>'+
           '<div class="myr-subj">'+(prof?prof.office:'')+'</div>'+
           '<div class="myr-topic">'+a.topic+(a.dept?' · '+a.dept:'')+'</div>'+
         '</div>'+

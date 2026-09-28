@@ -1,3 +1,5 @@
+import { setupProfessorList } from './student-list.js';
+
 const PAGE_IDS = {
   student: 'pg-s',
   professor: 'pg-p',
@@ -28,7 +30,7 @@ function writeStorage(key, value) {
   try {
     window.localStorage.setItem(key, value);
   } catch (error) {
-    // Storage may be unavailable in private browsing or restricted contexts.
+    // Storage may be unavailable in restricted contexts.
   }
 }
 
@@ -118,6 +120,7 @@ function setupConnectionStatus() {
     const isOffline = !navigator.onLine;
     offlineBar.hidden = !isOffline;
     offlineBar.setAttribute('aria-hidden', String(!isOffline));
+    offlineBar.classList.toggle('show', isOffline);
   };
 
   window.addEventListener('online', updateStatus);
@@ -177,4 +180,5 @@ document.addEventListener('DOMContentLoaded', () => {
   setupConnectionStatus();
   setupSearchClearButton();
   setupReducedMotion();
+  setupProfessorList();
 });

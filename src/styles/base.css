@@ -1,0 +1,121 @@
+/* Base reset and theme variables */
+
+:root {
+  --bg: #0f1420;
+  --bg2: #141928;
+  --bg3: #1a2136;
+  --card: #1c2540;
+  --card2: #22304f;
+  --border: rgba(245, 185, 0, 0.1);
+  --border2: rgba(245, 185, 0, 0.28);
+  --accent: #f5b900;
+  --accent-glow: rgba(245, 185, 0, 0.1);
+  --text: #edf0fb;
+  --text2: #8898bf;
+  --text3: #4a5878;
+  --success: #20d9a0;
+  --danger: #f43f5e;
+  --warn: #fb923c;
+  --r: 14px;
+  --rsm: 9px;
+  --rxs: 6px;
+  --sh: 0 8px 32px rgba(0, 0, 0, 0.55);
+}
+
+body.light {
+  --bg: #f0f4ff;
+  --bg2: #e8edf8;
+  --bg3: #dde4f5;
+  --card: #ffffff;
+  --card2: #eef2fd;
+  --border: rgba(30, 60, 120, 0.12);
+  --border2: rgba(30, 60, 120, 0.25);
+  --accent: #c49200;
+  --accent-glow: rgba(196, 146, 0, 0.1);
+  --text: #1a2340;
+  --text2: #4a5878;
+  --text3: #8898bf;
+  --success: #0fa878;
+  --danger: #d63050;
+  --warn: #d97706;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body.light {
+  color-scheme: light;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  user-select: text;
+  line-height: 1.5;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  color: var(--text);
+}
+
+main {
+  padding: 1.75rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.wrap {
+  position: relative;
+  z-index: 1;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(245, 185, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 185, 0, 0.025) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body.light::before {
+  background-image:
+    linear-gradient(rgba(30, 60, 120, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 60, 120, 0.04) 1px, transparent 1px);
+}

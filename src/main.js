@@ -10,8 +10,26 @@ const NAV_BUTTONS = {
   reservations: 'btn-student2'
 };
 
+const THEME_STORAGE_KEY = 'vtszr_theme';
+
 function getElement(id) {
   return document.getElementById(id);
+}
+
+function readStorage(key) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch (error) {
+    return null;
+  }
+}
+
+function writeStorage(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch (error) {
+    // Storage may be unavailable in private browsing or restricted contexts.
+  }
 }
 
 function setActivePage(pageName) {
@@ -56,6 +74,7 @@ function setupNavigation() {
     }
 
     button.type = 'button';
+    button.setAttribute('aria-controls', PAGE_IDS[pageName]);
     button.addEventListener('click', () => setActivePage(pageName));
   });
 
@@ -69,17 +88,18 @@ function setupThemeToggle() {
     return;
   }
 
-  const savedTheme = window.localStorage.getItem('consultabook-theme');
+  const savedTheme = readStorage(THEME_STORAGE_KEY);
   const prefersLight = window.matchMedia?.('(prefers-color-scheme: light)').matches;
   const initialTheme = savedTheme || (prefersLight ? 'light' : 'dark');
 
   document.body.classList.toggle('light', initialTheme === 'light');
   themeButton.type = 'button';
+  themeButton.setAttribute('aria-label', 'Промени тему');
   themeButton.setAttribute('aria-pressed', String(initialTheme === 'light'));
 
   themeButton.addEventListener('click', () => {
     const isLight = document.body.classList.toggle('light');
-    window.localStorage.setItem('consultabook-theme', isLight ? 'light' : 'dark');
+    writeStorage(THEME_STORAGE_KEY, isLight ? 'light' : 'dark');
     themeButton.setAttribute('aria-pressed', String(isLight));
   });
 }
@@ -90,6 +110,9 @@ function setupConnectionStatus() {
   if (!offlineBar) {
     return;
   }
+
+  offlineBar.setAttribute('role', 'status');
+  offlineBar.setAttribute('aria-live', 'polite');
 
   const updateStatus = () => {
     const isOffline = !navigator.onLine;
@@ -110,8 +133,13 @@ function setupSearchClearButton() {
     return;
   }
 
+  searchInput.setAttribute('aria-label', 'Претражи наставнике или предмете');
+  clearButton.type = 'button';
+
   const updateClearButton = () => {
-    clearButton.classList.toggle('show', searchInput.value.length > 0);
+    const hasValue = searchInput.value.length > 0;
+    clearButton.classList.toggle('show', hasValue);
+    clearButton.hidden = !hasValue;
   };
 
   searchInput.addEventListener('input', updateClearButton);
@@ -124,9 +152,29 @@ function setupSearchClearButton() {
   updateClearButton();
 }
 
+function setupReducedMotion() {
+  const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reducedMotion) {
+    return;
+  }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  `;
+  document.head.append(style);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   setupThemeToggle();
   setupConnectionStatus();
   setupSearchClearButton();
+  setupReducedMotion();
 });

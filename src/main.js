@@ -1,4 +1,5 @@
 import { setupProfessorList } from './student-list.js';
+import { setupBookingPanel } from './booking.js';
 
 const PAGE_IDS = {
   student: 'pg-s',
@@ -181,4 +182,5 @@ document.addEventListener('DOMContentLoaded', () => {
   setupSearchClearButton();
   setupReducedMotion();
   setupProfessorList();
+  setupBookingPanel();
 });

@@ -4,188 +4,419 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>КонсултаБук — ВТШ Зрењанин</title>
-
-  <link rel="icon" type="image/png" href="...">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="./src/styles/accessibility.css">
   <link rel="stylesheet" href="./src/styles/base.css">
-
   <style>
-    /* existing inline CSS */
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(15, 20, 32, 0.94);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-mark {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(245, 185, 0, 0.12);
+      border: 1px solid var(--border2);
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .logo-t {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .logo-s {
+      font-size: .64rem;
+      color: var(--text3);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .rtog {
+      display: flex;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      padding: 3px;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .rbtn {
+      padding: .4rem 1.15rem;
+      border-radius: 40px;
+      border: none;
+      background: transparent;
+      color: var(--text2);
+      font-family: 'Nunito', sans-serif;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .22s ease;
+    }
+
+    .rbtn.on {
+      background: var(--accent);
+      color: #0f1420;
+      font-weight: 800;
+    }
+
+    .theme-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .theme-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    main {
+      padding: 1.75rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .pg {
+      display: none;
+      animation: fadeUp .32s ease;
+    }
+
+    .pg.on {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sh {
+      margin-bottom: 1.2rem;
+    }
+
+    .sh h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: .3rem;
+    }
+
+    .sh p {
+      color: var(--text2);
+      font-size: .875rem;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      flex-wrap: wrap;
+      margin-bottom: .85rem;
+    }
+
+    .sbox {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 340px;
+    }
+
+    .sbox svg {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px;
+      height: 15px;
+      color: var(--text3);
+      pointer-events: none;
+    }
+
+    .sbox input {
+      width: 100%;
+      padding: .58rem .9rem .58rem 2.4rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      font-size: .85rem;
+    }
+
+    .sbox input:focus {
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .clr-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      font-size: .8rem;
+      display: none;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    .clr-btn.show {
+      display: block;
+    }
+
+    .pcount {
+      font-size: .75rem;
+      color: var(--text3);
+      margin-bottom: .75rem;
+    }
+
+    #offline-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9998;
+      background: var(--danger);
+      color: #fff;
+      text-align: center;
+      padding: .5rem 1rem;
+      font-size: .82rem;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+    }
+
+    #offline-bar.show {
+      display: flex;
+    }
+
+    #offline-bar svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      transition: opacity .5s ease;
+    }
+
+    #loader.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loader-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .loader-logo-t {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .loader-logo-s {
+      font-size: .7rem;
+      color: var(--text3);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .loader-spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    .loader-text {
+      font-size: .82rem;
+      color: var(--text3);
+      animation: pulse 1.5s ease infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+
+    @media (max-width: 768px) {
+      header {
+        padding: .75rem 1rem;
+      }
+
+      main {
+        padding: 1rem;
+      }
+
+      .logo-s {
+        display: none;
+      }
+
+      .rtog {
+        padding: 2px;
+      }
+
+      .rbtn {
+        padding: .35rem .85rem;
+        font-size: .78rem;
+      }
+    }
   </style>
 </head>
 <body>
-  ...
-</body>
-</html>
-
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#0f1420;--bg2:#141928;--bg3:#1a2136;--card:#1c2540;--card2:#22304f;
-  --border:rgba(245,185,0,0.1);--border2:rgba(245,185,0,0.28);
-  --accent:#f5b900;--accent-glow:rgba(245,185,0,0.1);
-  --text:#edf0fb;--text2:#8898bf;--text3:#4a5878;
-  --success:#20d9a0;--danger:#f43f5e;--warn:#fb923c;
-  --r:14px;--rsm:9px;--rxs:6px;--sh:0 8px 32px rgba(0,0,0,0.55);
-}
-*{scrollbar-width:thin;scrollbar-color:var(--bg3) transparent;}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;user-select:text;}
-a,button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sbtn,.gcalbtn{user-select:none;}
-.gcalbtn{width:100%;padding:.6rem;background:transparent;color:var(--accent);border:1.5px solid rgba(245,185,0,0.35);border-radius:var(--rsm);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .22s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
-.gcalbtn:hover{background:var(--accent-glow);border-color:var(--accent);}
-.gcalbtn svg{width:14px;height:14px;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(245,185,0,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(245,185,0,0.025) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;}
-.wrap{position:relative;z-index:1;}
-
-/* HEADER */
-header{display:flex;align-items:center;justify-content:space-between;padding:.9rem 2rem;border-bottom:1px solid var(--border);background:rgba(15,20,32,0.94);backdrop-filter:blur(16px);position:sticky;top:0;z-index:100;}
-.logo{display:flex;align-items:center;gap:12px;}
-.logo img{height:64px;width:auto;}
-.logo-t{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;color:var(--accent);}
-.logo-s{font-size:.64rem;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px;}
-.rtog{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:40px;padding:3px;gap:3px;flex-shrink:0;}
-.rbtn{padding:.4rem 1.15rem;border-radius:40px;border:none;background:transparent;color:var(--text2);font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .22s;outline:none;}
-.rbtn:focus{outline:2px solid var(--accent);}
-.rbtn.on{background:var(--accent);color:#0f1420;font-weight:800;}
-
-/* LAYOUT */
-main{padding:1.75rem 2rem;max-width:1400px;margin:0 auto;}
-.pg{display:none;animation:fu .32s ease;}
-.pg.on{display:block;}
-@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.sh{margin-bottom:1.4rem;}
-.sh h2{font-family:'Orbitron',monospace;font-size:1.25rem;font-weight:700;margin-bottom:.3rem;}
-.sh p{color:var(--text2);font-size:.875rem;}
-.al{width:32px;height:3px;background:var(--accent);border-radius:2px;margin-top:.5rem;}
-
-/* TOPBAR */
-.topbar{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;margin-bottom:.85rem;}
-.sbox{position:relative;flex:1;min-width:200px;max-width:340px;}
-.sbox svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--text3);pointer-events:none;}
-.sbox input{width:100%;padding:.58rem .9rem .58rem 2.4rem;background:var(--card);border:1px solid var(--border);border-radius:40px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.85rem;outline:none;}
-.sbox input:focus{border-color:var(--accent);}
-.sbox input::placeholder{color:var(--text3);}
-.clr-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem;display:none;padding:2px 4px;border-radius:4px;outline:none;}
-.clr-btn:focus{outline:1px solid var(--accent);}
-.clr-btn.show{display:block;}
-.dayfilt{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1rem;}
-.fbtn{padding:.38rem .85rem;border-radius:40px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .22s;outline:none;}
-.fbtn:focus{outline:1px solid var(--accent);}
-.fbtn.on{background:var(--accent);border-color:var(--accent);color:#0f1420;}
-.fbtn:hover:not(.on){border-color:var(--border2);color:var(--text);}
-.view-toggle{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0;}
-.vtbtn{padding:.38rem .75rem;border:none;background:transparent;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:5px;font-size:.75rem;font-family:'Nunito',sans-serif;font-weight:600;transition:all .22s;outline:none;}
-.vtbtn:focus{outline:1px solid var(--accent);}
-.vtbtn.on{background:var(--card2);color:var(--accent);}
-.vtbtn svg{width:14px;height:14px;}
-.pcount{font-size:.75rem;color:var(--text3);margin-bottom:.75rem;}
-
-/* SECURITY: HTML escaping helper */
-.escape-html{display:none;}
-
-body.light{
-  --bg:#f0f4ff;--bg2:#e8edf8;--bg3:#dde4f5;--card:#ffffff;--card2:#eef2fd;
-  --border:rgba(30,60,120,0.12);--border2:rgba(30,60,120,0.25);
-  --accent:#c49200;--accent-glow:rgba(196,146,0,0.1);
-  --text:#1a2340;--text2:#4a5878;--text3:#8898bf;
-  --success:#0fa878;--danger:#d63050;--warn:#d97706;
-}
-body.light::before{background-image:linear-gradient(rgba(30,60,120,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(30,60,120,0.04) 1px,transparent 1px);}
-body.light header{background:rgba(240,244,255,0.94);}
-body.light .fg input,body.light .fg textarea,body.light .fg select{color:var(--text);}
-body.light .fg select option{background:#fff;}
-
-/* Скраћена CSS - остатак је исти као оригинал */
-/* COMPACT CARDS, BOOKING, LOGIN, PORTAL - све остале стилове преносимо... */
-
-</style>
-</head>
-<body>
-<div id="offline-bar">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="20"/></svg>
-  Нема интернет везе — апликација ради у офлајн режиму, резервације неће бити сачуване
-</div>
-
-<div id="loader">
-  <div class="loader-logo">
-    <div>
-      <div class="loader-logo-t">КонсултаБук</div>
-      <div class="loader-logo-s">ВТШ Зрењанин</div>
-    </div>
+  <div id="offline-bar" role="status" aria-live="polite" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12" y2="16"></line>
+    </svg>
+    Нема интернет везе — апликација ради у офлајн режиму, резервације неће бити сачуване
   </div>
-  <div class="loader-spinner"></div>
-  <div class="loader-text">Повезивање са базом податак...</div>
-</div>
 
-<div class="wrap">
-<header>
-  <div class="logo">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPcAAADcCAYAAACs5zemAAABCGlDQ1BJQ0MgUHJvZmlsZQAAeJxjYGA8wQAELAYMDLl5JUVB7k4KEZFRCuwPGBiBEAwSk4sLGHADoKpv1yBqL+viUYcLcKakFicD6Q9ArFIEtBxopAiQ" alt="Logo">
-    <div>
-      <div class="logo-t">КонсултаБук</div>
-      <div class="logo-s">ВТШ Зрењанин &middot; Систем за резервацију консултација</div>
-    </div>
-  </div>
-  <div class="rtog">
-    <button class="rbtn on" id="btn-student">Студент</button>
-    <button class="rbtn" id="btn-professor">Професор</button>
-    <button class="rbtn" id="btn-student2">Моје резервације</button>
-  </div>
-  <div id="fb-status" style="display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--text3);"><div id="fb-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);"></div><span id="fb-label">Повезивање...</span></div>
-  <button class="theme-btn" id="theme-btn" title="Промени тему">
-    <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-  </button>
-</header>
-
-<main>
-<div id="pg-s" class="pg on">
-  <div id="vlist">
-    <div class="sh"><h2>Резервишите консултацију</h2><p>Изаберите наставника...</p></div>
-    <div class="topbar">
-      <div class="sbox">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="sq" placeholder="Претражи..." aria-label="Search">
-        <button class="clr-btn" id="clr-btn" aria-label="Clear">✕</button>
+  <div id="loader">
+    <div class="loader-logo">
+      <div>
+        <div class="loader-logo-t">КонсултаБук</div>
+        <div class="loader-logo-s">ВТШ Зрењанин</div>
       </div>
     </div>
-    <div class="pcount" id="pcount"></div>
-    <div id="pgrid"></div>
+    <div class="loader-spinner"></div>
+    <div class="loader-text" role="status" aria-live="polite">Повезивање са базом података...</div>
   </div>
-</div>
 
-<div id="pg-p" class="pg">
-  <div class="login-wrap">
-    <div style="padding:2rem;text-align:center;">
-      <h3>Портал за професоре</h3>
-      <p style="color:var(--text2);margin:1rem 0;">Пријавите се помоћу Firebase Authentication (конфигурисано на серверу)</p>
-    </div>
+  <div class="wrap">
+    <header>
+      <div class="logo" aria-label="КонсултаБук">
+        <div class="logo-mark">КБ</div>
+        <div>
+          <div class="logo-t">КонсултаБук</div>
+          <div class="logo-s">ВТШ Зрењанин &middot; Систем за резервацију консултација</div>
+        </div>
+      </div>
+
+      <nav class="rtog" aria-label="Главна навигација">
+        <button class="rbtn on" id="btn-student" type="button" aria-controls="pg-s">Студент</button>
+        <button class="rbtn" id="btn-professor" type="button" aria-controls="pg-p">Професор</button>
+        <button class="rbtn" id="btn-student2" type="button" aria-controls="pg-m">Моје резервације</button>
+      </nav>
+
+      <button class="theme-btn" id="theme-btn" type="button" title="Промени тему" aria-label="Промени тему" aria-pressed="false">
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+    </header>
+
+    <main>
+      <section id="pg-s" class="pg on" aria-label="Студент секција">
+        <div class="sh">
+          <h2>Резервишите консултацију</h2>
+          <p>Изаберите наставника...</p>
+        </div>
+
+        <div class="topbar">
+          <div class="sbox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="sq" placeholder="Претражи..." aria-label="Претражи наставнике">
+            <button class="clr-btn" id="clr-btn" type="button" aria-label="Очисти претрагу">✕</button>
+          </div>
+        </div>
+
+        <div class="pcount" id="pcount">Приказано 0 наставника</div>
+        <div id="pgrid"></div>
+      </section>
+
+      <section id="pg-p" class="pg" aria-label="Портал за професоре" hidden>
+        <div class="login-wrap">
+          <div style="padding:2rem;text-align:center;">
+            <h3>Портал за професоре</h3>
+            <p style="color:var(--text2);margin:1rem 0;">Пријавите се помоћу Firebase Authentication (конфигурисано на серверу)</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="pg-m" class="pg" aria-label="Моје резервације" hidden>
+        <div style="padding:2rem;text-align:center;">
+          <h2>Моје резервације</h2>
+          <p>Функционалност преноса у нови репо...</p>
+        </div>
+      </section>
+    </main>
   </div>
-</div>
 
-<div id="pg-m" class="pg">
-  <div style="padding:2rem;text-align:center;">
-    <h2>Моје резервације</h2>
-    <p>Функционалност преноса у нови репо...</p>
-  </div>
-</div>
-
-</main>
-</div>
-
-<script>
-// SECURITY FIX: HTML Escaping utility function
-function escapeHtml(text){
-  var map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
-  return String(text).replace(/[&<>"']/g,function(m){return map[m];});
-}
-
-console.log('✓ HTML escaping helper loaded');
-console.log('✓ CSS malformed selector fixed (.gcalbtn)');
-console.log('⚠ Professor passwords removed - use Firebase Auth instead');
-console.log('→ See refactor/modular-structure branch for improvements');
-</script>
-
-<script type="module" src="./src/main.js"></script>
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>

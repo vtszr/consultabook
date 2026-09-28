@@ -38,8 +38,10 @@ function buildProfessorCards(list) {
     const professorId = Number(card.dataset.id);
 
     const openProfessor = () => {
-      console.log('Open professor', professorId);
-    };
+  window.dispatchEvent(new CustomEvent('consultabook:open-professor', {
+    detail: professorId
+  }));
+};
 
     card.addEventListener('click', openProfessor);
     card.addEventListener('keydown', (event) => {

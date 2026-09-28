@@ -1,16 +1,6 @@
 import { setupProfessorList } from './student-list.js';
 import { setupBookingPanel } from './booking.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-  setupNavigation();
-  setupThemeToggle();
-  setupConnectionStatus();
-  setupSearchClearButton();
-  setupReducedMotion();
-  setupProfessorList();
-  setupBookingPanel();
-});
-
 const PAGE_IDS = {
   student: 'pg-s',
   professor: 'pg-p',

@@ -1,0 +1,26 @@
+/* Accessibility and interaction improvements */
+
+[hidden] {
+  display: none !important;
+}
+
+:where(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid var(--accent, #f5b900);
+  outline-offset: 3px;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

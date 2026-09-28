@@ -3,8 +3,42 @@ import { professors } from './professors.js';
 const bookingPanel = document.getElementById('booking-panel');
 const bookingBody = document.getElementById('booking-body');
 const bookingClose = document.getElementById('booking-close');
+const RESERVATIONS_KEY = 'consultabook_reservations';
 
 let selectedProfessor = null;
+
+function readReservations() {
+  try {
+    const saved = window.localStorage.getItem(RESERVATIONS_KEY);
+    const reservations = saved ? JSON.parse(saved) : [];
+    return Array.isArray(reservations) ? reservations : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveReservation(reservation) {
+  try {
+    const reservations = readReservations();
+    reservations.push(reservation);
+    window.localStorage.setItem(RESERVATIONS_KEY, JSON.stringify(reservations));
+    window.dispatchEvent(new CustomEvent('consultabook:reservation-saved', {
+      detail: reservation
+    }));
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function getInitials(name) {
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0] || '')
+    .join('')
+    .toUpperCase();
+}
 
 function closeBookingPanel() {
   if (!bookingPanel) {
@@ -16,49 +50,42 @@ function closeBookingPanel() {
   bookingPanel.setAttribute('aria-hidden', 'true');
 }
 
+function bindSlotButtons() {
+  const inlineClose = document.getElementById('booking-close-inline');
+  if (inlineClose) {
+    inlineClose.addEventListener('click', closeBookingPanel);
+  }
+
+  bookingBody.querySelectorAll('.booking-slot').forEach((button) => {
+    button.addEventListener('click', () => {
+      const index = Number(button.dataset.index);
+      const session = selectedProfessor?.sessions[index];
+      if (session) {
+        renderReservationForm(session);
+      }
+    });
+  });
+}
+
 function renderSlotButtons(professor) {
   return `
     <div class="booking-card">
       <div class="booking-header">
-        <div class="booking-avatar" style="background:${professor.bg};">
-          ${professor.name
-            .split(/\s+/)
-            .slice(0, 2)
-            .map((part) => part[0] || '')
-            .join('')
-            .toUpperCase()}
-        </div>
+        <div class="booking-avatar" style="background:${professor.bg};">${getInitials(professor.name)}</div>
         <div>
           <h3>${professor.name}</h3>
           <p>${professor.subject}</p>
         </div>
       </div>
 
+      <p>Изаберите доступан термин:</p>
       <div class="booking-days">
-        ${professor.sessions
-          .map(
-            (session, index) => `
-              <button
-                type="button"
-                class="booking-slot"
-                data-index="${index}"
-                style="
-                  background: var(--bg3);
-                  border: 1px solid var(--border);
-                  border-radius: 10px;
-                  color: var(--text);
-                  padding: .75rem;
-                  cursor: pointer;
-                  text-align: left;
-                  font: inherit;
-                "
-              >
-                <strong>${session.day}</strong><br>
-                <span>${session.start} - ${session.end}</span>
-              </button>
-            `
-          )
-          .join('')}
+        ${professor.sessions.map((session, index) => `
+          <button type="button" class="booking-slot" data-index="${index}">
+            <strong>Дан ${session.day}</strong>
+            <span>${session.start} – ${session.end}</span>
+          </button>
+        `).join('')}
       </div>
 
       <div class="booking-actions">
@@ -76,41 +103,29 @@ function renderReservationForm(session) {
   bookingBody.innerHTML = `
     <div class="booking-card">
       <div class="booking-header">
-        <div class="booking-avatar" style="background:${selectedProfessor.bg};">
-          ${selectedProfessor.name
-            .split(/\s+/)
-            .slice(0, 2)
-            .map((part) => part[0] || '')
-            .join('')
-            .toUpperCase()}
-        </div>
+        <div class="booking-avatar" style="background:${selectedProfessor.bg};">${getInitials(selectedProfessor.name)}</div>
         <div>
           <h3>${selectedProfessor.name}</h3>
           <p>${selectedProfessor.subject}</p>
         </div>
       </div>
 
-      <p><strong>Изабран термин:</strong> ${session.day} • ${session.start} - ${session.end}</p>
+      <p><strong>Изабран термин:</strong> Дан ${session.day} · ${session.start} – ${session.end}</p>
 
       <form id="booking-form">
-        <div style="display:grid; gap:.75rem;">
-          <label style="display:grid; gap:.35rem;">
-            <span>Име и презиме</span>
-            <input type="text" name="studentName" required style="padding:.65rem .75rem; border-radius:10px; border:1px solid var(--border); background: var(--bg); color:var(--text);" />
-          </label>
-
-          <label style="display:grid; gap:.35rem;">
-            <span>Група / индекс</span>
-            <input type="text" name="studentGroup" required style="padding:.65rem .75rem; border-radius:10px; border:1px solid var(--border); background: var(--bg); color:var(--text);" />
-          </label>
-
-          <label style="display:grid; gap:.35rem;">
-            <span>Напомена</span>
-            <textarea name="note" rows="3" style="padding:.65rem .75rem; border-radius:10px; border:1px solid var(--border); background: var(--bg); color:var(--text); resize:vertical;"></textarea>
-          </label>
-        </div>
-
-        <div class="booking-actions" style="margin-top:1rem;">
+        <label class="booking-field">
+          <span>Име и презиме</span>
+          <input type="text" name="studentName" autocomplete="name" required>
+        </label>
+        <label class="booking-field">
+          <span>Група / индекс</span>
+          <input type="text" name="studentGroup" required>
+        </label>
+        <label class="booking-field">
+          <span>Напомена</span>
+          <textarea name="note" rows="3"></textarea>
+        </label>
+        <div class="booking-actions">
           <button type="submit" class="booking-primary">Потврди резервацију</button>
           <button type="button" class="booking-secondary" id="booking-back-to-slots">Назад</button>
         </div>
@@ -119,74 +134,43 @@ function renderReservationForm(session) {
   `;
 
   const form = document.getElementById('booking-form');
-  if (form) {
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-
-      const data = new FormData(form);
-      const payload = {
-        professorId: selectedProfessor.id,
-        professorName: selectedProfessor.name,
-        session,
-        studentName: data.get('studentName'),
-        studentGroup: data.get('studentGroup'),
-        note: data.get('note')
-      };
-
-      console.log('Reservation payload:', payload);
-      alert('Резервација је снимљена локално.');
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const data = new FormData(form);
+    const saved = saveReservation({
+      id: `${Date.now()}-${selectedProfessor.id}`,
+      professorId: selectedProfessor.id,
+      professorName: selectedProfessor.name,
+      session,
+      studentName: String(data.get('studentName') || '').trim(),
+      studentGroup: String(data.get('studentGroup') || '').trim(),
+      note: String(data.get('note') || '').trim(),
+      createdAt: new Date().toISOString()
     });
-  }
 
-  const backButton = document.getElementById('booking-back-to-slots');
-  if (backButton) {
-    backButton.addEventListener('click', () => {
-      bookingBody.innerHTML = renderSlotButtons(selectedProfessor);
+    if (saved) {
+      alert('Резервација је сачувана локално.');
+      closeBookingPanel();
+    } else {
+      alert('Резервација није могла да се сачува.');
+    }
+  });
 
-      const inlineClose = document.getElementById('booking-close-inline');
-      if (inlineClose) {
-        inlineClose.addEventListener('click', closeBookingPanel);
-      }
-
-      bookingBody.querySelectorAll('.booking-slot').forEach((button) => {
-        button.addEventListener('click', () => {
-          const index = Number(button.dataset.index);
-          const selectedSession = selectedProfessor.sessions[index];
-          if (selectedSession) {
-            renderReservationForm(selectedSession);
-          }
-        });
-      });
-    });
-  }
+  document.getElementById('booking-back-to-slots')?.addEventListener('click', () => {
+    bookingBody.innerHTML = renderSlotButtons(selectedProfessor);
+    bindSlotButtons();
+  });
 }
 
 function openBookingPanel(professorId) {
   const professor = professors.find((entry) => entry.id === professorId);
-
   if (!professor || !bookingPanel || !bookingBody) {
     return;
   }
 
   selectedProfessor = professor;
   bookingBody.innerHTML = renderSlotButtons(professor);
-
-  const inlineClose = document.getElementById('booking-close-inline');
-  if (inlineClose) {
-    inlineClose.addEventListener('click', closeBookingPanel);
-  }
-
-  bookingBody.querySelectorAll('.booking-slot').forEach((button) => {
-    button.addEventListener('click', () => {
-      const index = Number(button.dataset.index);
-      const selectedSession = professor.sessions[index];
-
-      if (selectedSession) {
-        renderReservationForm(selectedSession);
-      }
-    });
-  });
-
+  bindSlotButtons();
   bookingPanel.hidden = false;
   bookingPanel.classList.add('on');
   bookingPanel.setAttribute('aria-hidden', 'false');
@@ -198,11 +182,8 @@ export function setupBookingPanel() {
   }
 
   bookingClose.addEventListener('click', closeBookingPanel);
-
   window.addEventListener('consultabook:open-professor', (event) => {
-    const professorId = Number(event.detail);
-    openBookingPanel(professorId);
+    openBookingPanel(Number(event.detail));
   });
-
   closeBookingPanel();
 }

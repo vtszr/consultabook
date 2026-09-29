@@ -32,9 +32,13 @@ function showPortal(){
   document.getElementById('portal-subj').textContent = shortSubj + (shortSubj ? ' · ' : '') + p.office;
   renderStats(p.id);renderAppts(p.id,ptab_);
   renderBlockedList(p.id);
+  document.getElementById('auth-btn').style.display='none'; // наставник се одјављује дугметом у порталу
   var btn=document.getElementById('block-btn');
   if(btn&&!btn._wired){
     btn._wired=true;
+    fillTimeSelect('block-from','Од');fillTimeSelect('block-to','До');
+    var bd=document.getElementById('block-date');
+    bd.addEventListener('click',function(){try{bd.showPicker();}catch(e){}});
     btn.addEventListener('click',function(){
       var d=document.getElementById('block-date').value;
       var from=document.getElementById('block-from').value;
@@ -45,6 +49,12 @@ function showPortal(){
       blockDate(loggedProf.id,d,from,to);
     });
   }
+}
+// Падајућа листа времена (24 сата, корак 30 мин)
+function fillTimeSelect(id,placeholder){
+  var s=document.getElementById(id),h='<option value="">'+placeholder+'</option>';
+  for(var m=7*60;m<=21*60;m+=30)h+='<option value="'+pad(Math.floor(m/60))+':'+pad(m%60)+'">'+pad(Math.floor(m/60))+':'+pad(m%60)+'</option>';
+  s.innerHTML=h;
 }
 function renderStats(id){
   var all=appts.filter(function(a){return a.pid===id;}),

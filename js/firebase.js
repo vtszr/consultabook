@@ -109,6 +109,7 @@ function onAuth(user){
   // без "Запамти ме": ако пријава потиче из ранијег таба, одјави корисника
   if(user&&!getKeep()&&!hasSession()){auth.signOut();return;}
   var btn=document.getElementById('auth-btn');
+  btn.style.display='';
   var rw=document.getElementById('remember-wrap');if(rw)rw.style.display=user?'none':'';
   if(apptRef){apptRef.off();apptRef=null;}
   appts=[];loggedProf=null;

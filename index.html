@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -515,6 +516,7 @@ button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sb
     <button class="rbtn" id="btn-student2">Моје резервације</button>
   </div>
   <div id="fb-status" style="display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--text3);"><div id="fb-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);"></div><span id="fb-label">Повезивање...</span></div>
+  <button id="auth-btn" style="background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:8px;padding:.35rem .7rem;font-size:.72rem;cursor:pointer;white-space:nowrap;">Пријава (Google)</button>
   <button class="theme-btn" id="theme-btn" title="Промени тему">
     <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
   </button>
@@ -618,10 +620,10 @@ button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sb
         <p>Пријавите се да видите своје термине</p>
       </div>
       <div class="login-err" id="login-err">Погрешно корисничко ime или лозинка.</div>
-      <div class="fg"><label>Корисничко ime</label><input type="text" id="l-user" placeholder="нпр. секулић"></div>
-      <div class="fg"><label>Лозинка</label><input type="password" id="l-pass" placeholder="vtszr + редни број"></div>
+      <div class="fg"><label>Мејл адреса</label><input type="text" id="l-user" placeholder="ime.prezime@vtszr.edu.rs" autocomplete="username"></div>
+      <div class="fg"><label>Лозинка</label><input type="password" id="l-pass" placeholder="Лозинка" autocomplete="current-password"></div>
       <button class="login-btn" id="login-btn">Пријави се</button>
-      <p class="login-hint">Корисничко ime = презиме (латиница) &nbsp;|&nbsp; Лозинка = vtszr + редни број</p>
+      <p class="login-hint">Налог наставника креира администратор система.</p>
     </div>
   </div>
   <div id="p-portal" style="display:none;">
@@ -693,7 +695,7 @@ button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.week-slot,.cday.av,.sb
 <div class="tc" id="tc"></div>
 <script>
 
-var professors = [{"id": 1, "name": "Борјановић др Ирис", "subject": "Физика · Електрична мерења физичких величина · Заштита од ел. зрачења · Термодинамика", "office": "Кабинет 208", "sessions": [{"day": 2, "start": "09:00", "end": "11:00"}, {"day": 4, "start": "08:00", "end": "10:00"}], "bg": "#1d5aa8", "username": "borjanovic", "password": "vtszr1"}, {"id": 2, "name": "Деретић мр Олга", "subject": "Енглески језик · Пословни енглески језик", "office": "Кабинет 226", "sessions": [{"day": 2, "start": "11:00", "end": "13:00"}, {"day": 5, "start": "10:00", "end": "12:00"}], "bg": "#a81d5a", "username": "deretic", "password": "vtszr2"}, {"id": 3, "name": "Драшковић др Милана", "subject": "Технологија козметичких производа · Технологија фармацеутских производа · Козметичке сировине · Основи фармакологије", "office": "Кабинет 226", "sessions": [{"day": 3, "start": "13:00", "end": "15:00"}, {"day": 2, "start": "14:00", "end": "16:00"}], "bg": "#1da8a8", "username": "draskovic", "password": "vtszr3"}, {"id": 4, "name": "Еремић др Жељко", "subject": "Увод у рачунарство · Технике програмирања · Интернет технологије · ООП · Рачунарске мреже", "office": "Кабинет 135", "sessions": [{"day": 2, "start": "14:00", "end": "16:00"}, {"day": 4, "start": "10:00", "end": "12:00"}], "bg": "#5a1da8", "username": "eremic", "password": "vtszr4"}, {"id": 5, "name": "Ерић мр Спасоје", "subject": "Дигитални системи · Машински елементи · Конструисање и развој производа", "office": "Кабинет 133", "sessions": [{"day": 1, "start": "15:00", "end": "17:00"}, {"day": 3, "start": "09:00", "end": "11:00"}], "bg": "#a84c1d", "username": "eric", "password": "vtszr5"}, {"id": 6, "name": "Халас др Драган", "subject": "Електротехника · Основе електротехнике", "office": "Кабинет 231", "sessions": [{"day": 3, "start": "16:00", "end": "18:00"}, {"day": 1, "start": "10:00", "end": "12:00"}], "bg": "#1da85a", "username": "halas", "password": "vtszr6"}, {"id": 7, "name": "Јашин др Данијела", "subject": "Општа и неорганска хемија · Органска хемија", "office": "Кабинет 140", "sessions": [{"day": 3, "start": "12:00", "end": "14:00"}, {"day": 4, "start": "18:00", "end": "20:00"}], "bg": "#a81d8a", "username": "jasin", "password": "vtszr7"}, {"id": 8, "name": "Јовановић др Душан", "subject": "Технологија машинске обраде 1 и 2 · Технологија заваривања · Нове производне технологије", "office": "Кабинет 144", "sessions": [{"day": 1, "start": "09:30", "end": "11:30"}, {"day": 3, "start": "17:00", "end": "19:00"}], "bg": "#8aa81d", "username": "jovanovic", "password": "vtszr8"}, {"id": 9, "name": "Керлета др Војин", "subject": "Електричне инсталације и расвета", "office": "Кабинет 135", "sessions": [{"day": 5, "start": "14:00", "end": "16:00"}, {"day": 2, "start": "10:00", "end": "12:00"}], "bg": "#1d8aa8", "username": "kerleta", "password": "vtszr9"}, {"id": 10, "name": "Киурски Милошевић др Јелена", "subject": "Физика · Термодинамика · Екологија и заштита животне средине · Технологија вода", "office": "Кабинет 207", "sessions": [{"day": 2, "start": "11:00", "end": "13:00"}, {"day": 5, "start": "12:00", "end": "14:00"}], "bg": "#a8901d", "username": "kiurski", "password": "vtszr10"}, {"id": 11, "name": "Ковачевић др Миодраг", "subject": "Аналитичка хемија · Инструменталне методе анализе", "office": "Кабинет 109", "sessions": [{"day": 2, "start": "11:30", "end": "13:30"}, {"day": 4, "start": "09:00", "end": "11:00"}], "bg": "#6a1da8", "username": "kovacevic", "password": "vtszr11"}, {"id": 12, "name": "Лазић др Матилда", "subject": "Опасне материје", "office": "Кабинет 231", "sessions": [{"day": 2, "start": "13:00", "end": "15:00"}, {"day": 4, "start": "08:30", "end": "10:30"}], "bg": "#1da870", "username": "lazic", "password": "vtszr12"}, {"id": 13, "name": "Лазић Вулићевић др Љубица", "subject": "Механика 1 · Технички материјали · Механика 2", "office": "Кабинет 146", "sessions": [{"day": 4, "start": "15:00", "end": "17:00"}, {"day": 3, "start": "17:00", "end": "19:00"}], "bg": "#a83c1d", "username": "lazic2", "password": "vtszr13"}, {"id": 14, "name": "Лудајић др Гордана", "subject": "Прехрамбено инжењерство · Технологија меса и рибе · Технологија млека", "office": "Кабинет 207", "sessions": [{"day": 2, "start": "11:00", "end": "13:00"}, {"day": 5, "start": "09:00", "end": "11:00"}], "bg": "#1d6aa8", "username": "ludajic", "password": "vtszr14"}, {"id": 15, "name": "Малић др Душан", "subject": "Логистика · Транспортни системи · Оперативни системи", "office": "Кабинет 406", "sessions": [{"day": 5, "start": "16:00", "end": "18:00"}, {"day": 2, "start": "14:00", "end": "16:00"}], "bg": "#a8601d", "username": "malic", "password": "vtszr15"}, {"id": 16, "name": "Матотек Анђелић др Марија", "subject": "Увод у теорију ризика", "office": "Кабинет 304", "sessions": [{"day": 2, "start": "12:00", "end": "14:00"}, {"day": 4, "start": "11:00", "end": "13:00"}], "bg": "#1da8c0", "username": "matotek", "password": "vtszr16"}, {"id": 17, "name": "Мирков др Смиљана", "subject": "Социологија", "office": "Кабинет 209", "sessions": [{"day": 2, "start": "11:30", "end": "13:30"}, {"day": 4, "start": "14:00", "end": "16:00"}], "bg": "#8a1da8", "username": "mirkov", "password": "vtszr17"}, {"id": 18, "name": "Молнар др Роберт", "subject": "Управљање производњом · Предузетништво", "office": "Кабинет 304", "sessions": [{"day": 3, "start": "11:00", "end": "13:00"}, {"day": 4, "start": "18:00", "end": "20:00"}], "bg": "#a8a01d", "username": "molnar", "password": "vtszr18"}, {"id": 19, "name": "Младеновић Валентина", "subject": "Хемија хране · Нутриционизам · Биохемија", "office": "Кабинет 148", "sessions": [{"day": 4, "start": "11:30", "end": "13:30"}, {"day": 1, "start": "14:00", "end": "16:00"}], "bg": "#1d3ca8", "username": "mladenovic", "password": "vtszr19"}, {"id": 20, "name": "Нађалин др Весна", "subject": "Микробиологија", "office": "Кабинет 228", "sessions": [{"day": 4, "start": "13:00", "end": "15:00"}, {"day": 1, "start": "11:00", "end": "13:00"}], "bg": "#a8201d", "username": "nadjalin", "password": "vtszr20"}, {"id": 21, "name": "Николин др Татјана", "subject": "Хемија · Биохемија · Прехрамбена хемија", "office": "Кабинет 225", "sessions": [{"day": 1, "start": "11:30", "end": "13:30"}, {"day": 4, "start": "12:00", "end": "14:00"}], "bg": "#1d8060", "username": "nikolin", "password": "vtszr21"}, {"id": 22, "name": "Новаковић др Милада", "subject": "Примењена математика · Статистика · Нумеричке методе", "office": "Кабинет 145", "sessions": [{"day": 3, "start": "14:00", "end": "16:00"}, {"day": 5, "start": "11:00", "end": "13:00"}], "bg": "#a86a1d", "username": "novakovic", "password": "vtszr22"}, {"id": 23, "name": "Поповић др Жељко", "subject": "Менаџмент квалитетом · Индустријски менаџмент · Управљање пројектима", "office": "Кабинет 135", "sessions": [{"day": 2, "start": "14:30", "end": "16:30"}, {"day": 1, "start": "17:00", "end": "19:00"}], "bg": "#601da8", "username": "popovic", "password": "vtszr23"}, {"id": 24, "name": "Рајић др Александар", "subject": "Техничко цртање са компјутерском графиком", "office": "Кабинет 133", "sessions": [{"day": 1, "start": "17:00", "end": "19:00"}, {"day": 5, "start": "16:00", "end": "18:00"}], "bg": "#1da848", "username": "rajic", "password": "vtszr24"}, {"id": 25, "name": "Секулић др Тања", "subject": "Математика · Теорија одлучивања", "office": "Кабинет 304", "sessions": [{"day": 3, "start": "12:00", "end": "14:00"}, {"day": 1, "start": "10:00", "end": "12:00"}], "bg": "#a81d40", "username": "sekulic", "password": "vtszr25"}, {"id": 26, "name": "Тадић др Владимир", "subject": "Рачунарство · Информатика · Основе рачунарских мрежа", "office": "Кабинет 135", "sessions": [{"day": 3, "start": "11:00", "end": "13:00"}, {"day": 5, "start": "14:00", "end": "16:00"}], "bg": "#1d50a8", "username": "tadic", "password": "vtszr26"}, {"id": 27, "name": "Шуђуровић др Александра", "subject": "Физичка хемија", "office": "Кабинет 213", "sessions": [{"day": 4, "start": "12:00", "end": "14:00"}, {"day": 2, "start": "15:00", "end": "17:00"}], "bg": "#a8501d", "username": "sudjurovic", "password": "vtszr27"}, {"id": 28, "name": "Манојловић др Лазо", "subject": "Основе електронике · Енергетска електроника · Процесори и микроконтролери", "office": "Кабинет 220", "sessions": [{"day": 2, "start": "10:00", "end": "12:00"}, {"day": 4, "start": "14:00", "end": "16:00"}], "bg": "#2a6ab5", "username": "manojlovic", "password": "vtszr28"}, {"id": 29, "name": "Сташевић др Миленко", "subject": "Отпорност материјала", "office": "Кабинет 118", "sessions": [{"day": 3, "start": "10:00", "end": "12:00"}, {"day": 1, "start": "14:00", "end": "16:00"}], "bg": "#b55a2a", "username": "stasevic", "password": "vtszr29"}, {"id": 30, "name": "Жепинић др Цвијан", "subject": "Машински елементи", "office": "Кабинет 130", "sessions": [{"day": 4, "start": "10:00", "end": "12:00"}, {"day": 2, "start": "16:00", "end": "18:00"}], "bg": "#2ab57a", "username": "zepinic", "password": "vtszr30"}];
+var professors = [{"id": 1, "name": "Борјановић др Ирис", "subject": "Физика · Електрична мерења физичких величина · Заштита од ел. зрачења · Термодинамика", "office": "Кабинет 208", "sessions": [{"day": 2, "start": "09:00", "end": "11:00"}, {"day": 4, "start": "08:00", "end": "10:00"}], "bg": "#1d5aa8"}, {"id": 2, "name": "Деретић мр Олга", "subject": "Енглески језик · Пословни енглески језик", "office": "Кабинет 226", "sessions": [{"day": 2, "start": "11:00", "end": "13:00"}, {"day": 5, "start": "10:00", "end": "12:00"}], "bg": "#a81d5a"}, {"id": 3, "name": "Драшковић др Милана", "subject": "Технологија козметичких производа · Технологија фармацеутских производа · Козметичке сировине · Основи фармакологије", "office": "Кабинет 226", "sessions": [{"day": 3, "start": "13:00", "end": "15:00"}, {"day": 2, "start": "14:00", "end": "16:00"}], "bg": "#1da8a8"}, {"id": 4, "name": "Еремић др Жељко", "subject": "Увод у рачунарство · Технике програмирања · Интернет технологије · ООП · Рачунарске мреже", "office": "Кабинет 135", "sessions": [{"day": 2, "start": "14:00", "end": "16:00"}, {"day": 4, "start": "10:00", "end": "12:00"}], "bg": "#5a1da8"}, {"id": 5, "name": "Ерић мр Спасоје", "subject": "Дигитални системи · Машински елементи · Конструисање и развој производа", "office": "Кабинет 133", "sessions": [{"day": 1, "start": "15:00", "end": "17:00"}, {"day": 3, "start": "09:00", "end": "11:00"}], "bg": "#a84c1d"}, {"id": 6, "name": "Халас др Драган", "subject": "Електротехника · Основе електротехнике", "office": "Кабинет 231", "sessions": [{"day": 3, "start": "16:00", "end": "18:00"}, {"day": 1, "start": "10:00", "end": "12:00"}], "bg": "#1da85a"}, {"id": 7, "name": "Јашин др Данијела", "subject": "Општа и неорганска хемија · Органска хемија", "office": "Кабинет 140", "sessions": [{"day": 3, "start": "12:00", "end": "14:00"}, {"day": 4, "start": "18:00", "end": "20:00"}], "bg": "#a81d8a"}, {"id": 8, "name": "Јовановић др Душан", "subject": "Технологија машинске обраде 1 и 2 · Технологија заваривања · Нове производне технологије", "office": "Кабинет 144", "sessions": [{"day": 1, "start": "09:30", "end": "11:30"}, {"day": 3, "start": "17:00", "end": "19:00"}], "bg": "#8aa81d"}, {"id": 9, "name": "Керлета др Војин", "subject": "Електричне инсталације и расвета", "office": "Кабинет 135", "sessions": [{"day": 5, "start": "14:00", "end": "16:00"}, {"day": 2, "start": "10:00", "end": "12:00"}], "bg": "#1d8aa8"}, {"id": 10, "name": "Киурски Милошевић др Јелена", "subject": "Физика · Термодинамика · Екологија и заштита животне средине · Технологија вода", "office": "Кабинет 207", "sessions": [{"day": 2, "start": "11:00", "end": "13:00"}, {"day": 5, "start": "12:00", "end": "14:00"}], "bg": "#a8901d"}, {"id": 11, "name": "Ковачевић др Миодраг", "subject": "Аналитичка хемија · Инструменталне методе анализе", "office": "Кабинет 109", "sessions": [{"day": 2, "start": "11:30", "end": "13:30"}, {"day": 4, "start": "09:00", "end": "11:00"}], "bg": "#6a1da8"}, {"id": 12, "name": "Лазић др Матилда", "subject": "Опасне материје", "office": "Кабинет 231", "sessions": [{"day": 2, "start": "13:00", "end": "15:00"}, {"day": 4, "start": "08:30", "end": "10:30"}], "bg": "#1da870"}, {"id": 13, "name": "Лазић Вулићевић др Љубица", "subject": "Механика 1 · Технички материјали · Механика 2", "office": "Кабинет 146", "sessions": [{"day": 4, "start": "15:00", "end": "17:00"}, {"day": 3, "start": "17:00", "end": "19:00"}], "bg": "#a83c1d"}, {"id": 14, "name": "Лудајић др Гордана", "subject": "Прехрамбено инжењерство · Технологија меса и рибе · Технологија млека", "office": "Кабинет 207", "sessions": [{"day": 2, "start": "11:00", "end": "13:00"}, {"day": 5, "start": "09:00", "end": "11:00"}], "bg": "#1d6aa8"}, {"id": 15, "name": "Малић др Душан", "subject": "Логистика · Транспортни системи · Оперативни системи", "office": "Кабинет 406", "sessions": [{"day": 5, "start": "16:00", "end": "18:00"}, {"day": 2, "start": "14:00", "end": "16:00"}], "bg": "#a8601d"}, {"id": 16, "name": "Матотек Анђелић др Марија", "subject": "Увод у теорију ризика", "office": "Кабинет 304", "sessions": [{"day": 2, "start": "12:00", "end": "14:00"}, {"day": 4, "start": "11:00", "end": "13:00"}], "bg": "#1da8c0"}, {"id": 17, "name": "Мирков др Смиљана", "subject": "Социологија", "office": "Кабинет 209", "sessions": [{"day": 2, "start": "11:30", "end": "13:30"}, {"day": 4, "start": "14:00", "end": "16:00"}], "bg": "#8a1da8"}, {"id": 18, "name": "Молнар др Роберт", "subject": "Управљање производњом · Предузетништво", "office": "Кабинет 304", "sessions": [{"day": 3, "start": "11:00", "end": "13:00"}, {"day": 4, "start": "18:00", "end": "20:00"}], "bg": "#a8a01d"}, {"id": 19, "name": "Младеновић Валентина", "subject": "Хемија хране · Нутриционизам · Биохемија", "office": "Кабинет 148", "sessions": [{"day": 4, "start": "11:30", "end": "13:30"}, {"day": 1, "start": "14:00", "end": "16:00"}], "bg": "#1d3ca8"}, {"id": 20, "name": "Нађалин др Весна", "subject": "Микробиологија", "office": "Кабинет 228", "sessions": [{"day": 4, "start": "13:00", "end": "15:00"}, {"day": 1, "start": "11:00", "end": "13:00"}], "bg": "#a8201d"}, {"id": 21, "name": "Николин др Татјана", "subject": "Хемија · Биохемија · Прехрамбена хемија", "office": "Кабинет 225", "sessions": [{"day": 1, "start": "11:30", "end": "13:30"}, {"day": 4, "start": "12:00", "end": "14:00"}], "bg": "#1d8060"}, {"id": 22, "name": "Новаковић др Милада", "subject": "Примењена математика · Статистика · Нумеричке методе", "office": "Кабинет 145", "sessions": [{"day": 3, "start": "14:00", "end": "16:00"}, {"day": 5, "start": "11:00", "end": "13:00"}], "bg": "#a86a1d"}, {"id": 23, "name": "Поповић др Жељко", "subject": "Менаџмент квалитетом · Индустријски менаџмент · Управљање пројектима", "office": "Кабинет 135", "sessions": [{"day": 2, "start": "14:30", "end": "16:30"}, {"day": 1, "start": "17:00", "end": "19:00"}], "bg": "#601da8"}, {"id": 24, "name": "Рајић др Александар", "subject": "Техничко цртање са компјутерском графиком", "office": "Кабинет 133", "sessions": [{"day": 1, "start": "17:00", "end": "19:00"}, {"day": 5, "start": "16:00", "end": "18:00"}], "bg": "#1da848"}, {"id": 25, "name": "Секулић др Тања", "subject": "Математика · Теорија одлучивања", "office": "Кабинет 304", "sessions": [{"day": 3, "start": "12:00", "end": "14:00"}, {"day": 1, "start": "10:00", "end": "12:00"}], "bg": "#a81d40"}, {"id": 26, "name": "Тадић др Владимир", "subject": "Рачунарство · Информатика · Основе рачунарских мрежа", "office": "Кабинет 135", "sessions": [{"day": 3, "start": "11:00", "end": "13:00"}, {"day": 5, "start": "14:00", "end": "16:00"}], "bg": "#1d50a8"}, {"id": 27, "name": "Шуђуровић др Александра", "subject": "Физичка хемија", "office": "Кабинет 213", "sessions": [{"day": 4, "start": "12:00", "end": "14:00"}, {"day": 2, "start": "15:00", "end": "17:00"}], "bg": "#a8501d"}, {"id": 28, "name": "Манојловић др Лазо", "subject": "Основе електронике · Енергетска електроника · Процесори и микроконтролери", "office": "Кабинет 220", "sessions": [{"day": 2, "start": "10:00", "end": "12:00"}, {"day": 4, "start": "14:00", "end": "16:00"}], "bg": "#2a6ab5"}, {"id": 29, "name": "Сташевић др Миленко", "subject": "Отпорност материјала", "office": "Кабинет 118", "sessions": [{"day": 3, "start": "10:00", "end": "12:00"}, {"day": 1, "start": "14:00", "end": "16:00"}], "bg": "#b55a2a"}, {"id": 30, "name": "Жепинић др Цвијан", "subject": "Машински елементи", "office": "Кабинет 130", "sessions": [{"day": 4, "start": "10:00", "end": "12:00"}, {"day": 2, "start": "16:00", "end": "18:00"}], "bg": "#2ab57a"}];
 var currentView = 'card';
 var fday = '';
 var appts = [], nid = 1, sp = null, sd = null, st = null;
@@ -705,7 +707,7 @@ var DSR = ['','Понедељак','Уторак','Среда','Четвртак
 var MONTHS = ['Јануар','Фебруар','Март','Април','Мај','Јун','Јул','Август','Септембар','Октобар','Новембар','Децембар'];
 var DOWS = ['Пон','Уто','Сре','Чет','Пет','Суб','Нед'];
 var DB_REF = 'consultabook/appointments';
-var db;
+var db, auth, takenSlots={}, attachAppts, apptRef=null, pendingProfLogin=false;
 
 var DEPTS = [
   {key:'et',   label:'Електротехника и рачунарство', color:'#20d9a0'},
@@ -717,6 +719,7 @@ var DEPTS = [
 var PROF_DEPT = {1:'et',2:'opste',3:'teh',4:'et',5:'et',6:'et',7:'teh',8:'mas',9:'et',10:'teh',11:'teh',12:'zas',13:'mas',14:'teh',15:'zas',16:'zas',17:'opste',18:'opste',19:'teh',20:'teh',21:'teh',22:'opste',23:'opste',24:'mas',25:'opste',26:'et',27:'teh',28:'et',29:'mas',30:'mas'};
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function pad(n){ return String(n).padStart(2,'0'); }
 function ini(n){ return n.replace(/др |мр /g,'').trim().split(/\s+/).slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
 function isT(d){ var t=new Date(); return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate(); }
@@ -741,7 +744,7 @@ function getSlots(date){
   var dow=date.getDay(),key=fmtK(date);
   var sess=sp.sessions.filter(function(s){return s.day===dow;});
   if(!sess.length)return[];
-  var bk=appts.filter(function(a){return a.pid===sp.id&&a.date===key;}).map(function(a){return a.time;});
+  var bk=Object.keys(takenSlots).filter(function(k){return k.indexOf(sp.id+'_'+key+'_')===0;}).map(function(k){var t=k.split('_')[2];return t.substr(0,2)+':'+t.substr(2);});
   var all=[];
   sess.forEach(function(s){all=all.concat(genSlots(s.start,s.end));});
   var now=new Date();
@@ -786,7 +789,10 @@ const firebaseConfig = {
 function initFirebase(){
   firebase.initializeApp(firebaseConfig);
   db = firebase.database();
-  db.ref(DB_REF).on('value',function(snapshot){
+  attachAppts=function(q){
+  if(apptRef)apptRef.off();
+  apptRef=q;
+  q.on('value',function(snapshot){
     var data=snapshot.val();
     appts=[];
     if(data){
@@ -797,7 +803,15 @@ function initFirebase(){
     nid=appts.length?Math.max.apply(null,appts.map(function(a){return a.id||0;}))+1:1;
     if(loggedProf){ renderStats(loggedProf.id); renderAppts(loggedProf.id,ptab_); }
     if(currentView==='week') renderWeek();
+  },function(e){console.error('appointments:',e.message);});
+  };
+  db.ref('consultabook/slots').on('value',function(snap){
+    takenSlots=snap.val()||{};
+    if(sp&&document.getElementById('vbook').classList.contains('on')){renderCal();renderSlots();}
+    if(currentView==='week')renderWeek();
   });
+  auth=firebase.auth();
+  auth.onAuthStateChanged(onAuth);
   // Connection status
   firebase.database().ref('.info/connected').on('value',function(snap){
     var dot=document.getElementById('fb-dot'),label=document.getElementById('fb-label');
@@ -817,9 +831,11 @@ function saveApptToFirebase(appt){
   db.ref(DB_REF+'/'+String(appt.id)).set(appt);
 }
 function deleteApptFromFirebase(id){
-  db.ref(DB_REF+'/'+String(id)).remove();
-  db.ref(DB_REF).orderByChild('id').equalTo(Number(id)).once('value',function(snap){
-    snap.forEach(function(c){c.ref.remove();});
+  var r=db.ref(DB_REF+'/'+String(id));
+  r.once('value',function(snap){
+    var a=snap.val();
+    if(a&&a.lock) db.ref('consultabook/slots/'+a.lock).remove();
+    r.remove();
   });
 }
 
@@ -966,7 +982,7 @@ function renderWeek(){
         var hasSess=p.sessions.some(function(s){if(s.day!==day)return false;return genSlots(s.start,s.end).some(function(sl){return sl.time===time;});});
         if(!hasSess)return;
         var date=weekDates[day],key=fmtK(date);
-        var isBooked=appts.some(function(a){return a.pid===p.id&&a.date===key&&a.time===time;});
+        var isBooked=!!takenSlots[p.id+'_'+key+'_'+time.replace(':','')];
         var isPast=isP(date)&&!isT(date);
         if(isBooked||isPast){
           html+='<div class="week-slot taken"><span class="ws-name">'+ini(p.name)+'</span></div>';
@@ -1075,24 +1091,30 @@ function chk(){
 }
 
 function hasDuplicate(name,idx,profId){
-  return appts.some(function(a){return a.pid===profId&&(a.idx===idx||a.name.toLowerCase()===name.toLowerCase());});
+  return appts.some(function(a){return a.pid===profId&&a.date>=fmtK(new Date())&&(a.idx===idx||a.name.toLowerCase()===name.toLowerCase());});
 }
 
 // ── CONFIRM BOOKING ───────────────────────────────────────────────────────────
 function confirmBook(){
+  if(!auth||!auth.currentUser){showToast('err','Потребна пријава','Пријавите се Google налогом (горе десно).');return;}
   var name=document.getElementById('fn').value.trim();
   var idx=document.getElementById('fi').value.trim();
   var dept=document.getElementById('fd').value;
   var year=document.getElementById('fy').value;
   var topic=document.getElementById('ft').value.trim();
+  name=esc(name);idx=esc(idx);topic=esc(topic);
   var dupWarn=document.getElementById('dup-warn');
   if(!name||!idx||!sd||!st){showToast('err','Недостају подаци','Попуните обавезна поља.');return;}
   if(hasDuplicate(name,idx,sp.id)){dupWarn.textContent='Студент '+name+' ('+idx+') већ има резервисан термин код овог наставника!';dupWarn.classList.add('on');return;}
   dupWarn.classList.remove('on');
   var slots=getSlots(sd),sl=slots.find(function(s){return s.time===st;});
   if(!sl||sl.booked){showToast('err','Термин заузет','Изаберите другачији термин.');renderSlots();return;}
-  var email=document.getElementById('fe')?document.getElementById('fe').value.trim():'';
-  var appt={id:nid++,pid:sp.id,name:name,idx:idx,email:email,dept:dept,year:year,topic:topic||'Општа консултација',date:fmtK(sd),time:st,label:sl.label};
+  var email=document.getElementById('fe')?document.getElementById('fe').value.trim():'';email=esc(email);
+  var appt={id:Date.now(),pid:sp.id,name:name,idx:idx,email:email,dept:dept,year:year,topic:topic||'Општа консултација',date:fmtK(sd),time:st,label:sl.label};
+  var lockKey=sp.id+'_'+fmtK(sd)+'_'+st.replace(':','');
+  appt.lock=lockKey;
+  appt.uid=auth.currentUser.uid;
+  var finish=function(){
   appts.push(appt);
   saveApptToFirebase(appt);
   var start=new Date(appt.date+'T'+sl.time+':00');
@@ -1116,25 +1138,29 @@ function confirmBook(){
   ['fn','fi','ft'].forEach(function(i){document.getElementById(i).value='';});
   ['fd','fy'].forEach(function(i){document.getElementById(i).value='';});
   if(loggedProf&&loggedProf.id===sp.id){renderStats(loggedProf.id);renderAppts(loggedProf.id,ptab_);}
+  };
+  document.getElementById('cbtn').disabled=true;
+  db.ref('consultabook/slots/'+lockKey).transaction(function(cur){return cur===null?auth.currentUser.uid:undefined;},function(err,ok){
+    if(err||!ok){showToast('err','Термин заузет','Неко је управо резервисао овај термин.');renderSlots();chk();return;}
+    finish();
+  });
 }
 
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
+// ── LOGIN───────────────────────────────────────────────────────
 function doLogin(){
-  var user=document.getElementById('l-user').value.trim().toLowerCase();
-  var pass=document.getElementById('l-pass').value.trim();
+  var email=document.getElementById('l-user').value.trim();
+  var pass=document.getElementById('l-pass').value;
   var err=document.getElementById('login-err');
-  var prof=professors.find(function(p){return p.username===user&&p.password===pass;});
-  if(!prof){err.classList.add('on');document.getElementById('l-pass').value='';return;}
-  err.classList.remove('on');loggedProf=prof;
-  try{sessionStorage.setItem('vtszr_logged',prof.id);}catch(e){}
-  showPortal();
+  err.classList.remove('on');
+  pendingProfLogin=true;
+  auth.signInWithEmailAndPassword(email,pass).catch(function(){
+    pendingProfLogin=false;err.classList.add('on');document.getElementById('l-pass').value='';
+  });
 }
 function doLogout(){
-  loggedProf=null;try{sessionStorage.removeItem('vtszr_logged');}catch(e){}
-  document.getElementById('p-portal').style.display='none';
-  document.getElementById('p-login').style.display='flex';
-  document.getElementById('l-user').value='';document.getElementById('l-pass').value='';ptab_='sve';
+  auth.signOut();ptab_='sve';
+  document.getElementById('l-user').value='';document.getElementById('l-pass').value='';
 }
 function showPortal(){
   document.getElementById('p-login').style.display='none';
@@ -1271,7 +1297,7 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('myr-idx').addEventListener('keydown',function(e){if(e.key==='Enter')searchMyAppts();});
 
   // Restore session
-  try{var s=sessionStorage.getItem('vtszr_logged');if(s){var prof=professors.find(function(p){return p.id===parseInt(s);});if(prof){loggedProf=prof;}}}catch(e){}
+  // сесију води Firebase Auth
 });
 
 
@@ -1332,11 +1358,12 @@ function launchConfetti(){
 
 // ── МОЈЕ РЕЗЕРВАЦИЈЕ ──────────────────────────────────────────────────────────
 function searchMyAppts(){
+  if(!auth||!auth.currentUser){document.getElementById('myr-results').innerHTML='<div class="myr-empty">Пријавите се (дугме горе десно) да видите своје резервације.</div>';return;}
   var idx = document.getElementById('myr-idx').value.trim();
   var res = document.getElementById('myr-results');
-  if(!idx){ res.innerHTML='<div class="myr-empty">Унеси број индекса.</div>'; return; }
+  
 
-  var mine = appts.filter(function(a){ return a.idx.toLowerCase()===idx.toLowerCase(); });
+  var mine = appts.filter(function(a){ return a.uid===auth.currentUser.uid; });
   mine.sort(function(a,b){ return (a.date+a.time).localeCompare(b.date+b.time); });
 
   if(!mine.length){
@@ -1361,6 +1388,7 @@ function searchMyAppts(){
           '<div class="myr-prof">'+(prof?prof.name:'Професор')+'</div>'+
           '<div class="myr-subj">'+(prof?prof.office:'')+'</div>'+
           '<div class="myr-topic">'+a.topic+(a.dept?' · '+a.dept:'')+'</div>'+
+          (a.comment?'<div class="myr-topic" style="color:var(--accent);">💬 '+a.comment+'</div>':'')+
         '</div>'+
         (isPast?
           '<span style="font-size:.68rem;color:var(--text3);flex-shrink:0;">Прошло</span>':
@@ -1397,6 +1425,7 @@ var pendingMyrIdx = null;
 // ── ДРЖАВНИ ПРАЗНИЦИ СРБИЈЕ ───────────────────────────────────────────────────
 // Фиксни празници (исти сваке године)
 var FIXED_HOLIDAYS = [
+  {m:0,  d:7},  // Божић
   {m:0,  d:1},  // Нова година
   {m:0,  d:2},  // Нова година (2. јануар)
   {m:1,  d:15}, // Дан државности (Сретење)
@@ -1413,6 +1442,14 @@ var EASTER_HOLIDAYS = {
   2026: [{m:3,d:10},{m:3,d:11},{m:3,d:12},{m:3,d:13}],
 };
 
+function easterHolidays(y){
+  var a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+34)%7;
+  var mo=Math.floor((d+e+114)/31),da=((d+e+114)%31)+1;
+  var easter=new Date(y,mo-1,da+13); // јулијански -> грегоријански (1900-2099)
+  var r=[];
+  for(var k=-2;k<=1;k++){var x=new Date(easter);x.setDate(easter.getDate()+k);r.push({m:x.getMonth(),d:x.getDate()});}
+  return r;
+}
 function isHoliday(date){
   var m=date.getMonth(), d=date.getDate(), y=date.getFullYear();
   // Фиксни
@@ -1420,7 +1457,7 @@ function isHoliday(date){
     if(FIXED_HOLIDAYS[i].m===m && FIXED_HOLIDAYS[i].d===d) return true;
   }
   // Ускрс
-  var easterDays = EASTER_HOLIDAYS[y]||[];
+  var easterDays = easterHolidays(y);
   for(var j=0;j<easterDays.length;j++){
     if(easterDays[j].m===m && easterDays[j].d===d) return true;
   }
@@ -1480,6 +1517,7 @@ function renderBlockedList(profId){
 function saveComment(apptId, text){
   var appt = appts.find(function(a){ return a.id === apptId; });
   if(!appt) return;
+  text = esc(text);
   appt.comment = text;
   db.ref('consultabook/appointments/' + String(apptId) + '/comment').set(text);
   showToast('ok', 'Коментар сачуван', '');
@@ -1578,6 +1616,35 @@ hasAvail = function(date){
   return _origHasAvail(date);
 };
 
+
+// ── AUTH ───────────────────────────────────────────────────
+function onAuth(user){
+  var btn=document.getElementById('auth-btn');
+  if(apptRef){apptRef.off();apptRef=null;}
+  appts=[];loggedProf=null;
+  document.getElementById('p-portal').style.display='none';
+  document.getElementById('p-login').style.display='flex';
+  if(!user){btn.textContent='Пријава (Google)';return;}
+  btn.textContent='Одјава · '+(user.displayName||user.email);
+  var asStudent=function(){
+    if(pendingProfLogin){pendingProfLogin=false;showToast('err','Нисте наставник','Овај налог нема приступ порталу за наставнике.');auth.signOut();return;}
+    attachAppts(db.ref(DB_REF).orderByChild('uid').equalTo(user.uid));
+  };
+  db.ref('consultabook/profs/'+user.uid).once('value',function(snap){
+    var pid=snap.val();
+    var prof=pid===null?null:professors.find(function(p){return p.id===pid;});
+    if(!prof){asStudent();return;}
+    pendingProfLogin=false;loggedProf=prof;
+    attachAppts(db.ref(DB_REF).orderByChild('pid').equalTo(pid));
+    showPortal();
+  },asStudent);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('auth-btn').addEventListener('click',function(){
+    if(auth.currentUser){auth.signOut();return;}
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){showToast('err','Пријава није успела',e.code||'');});
+  });
+});
 </script>
 </body>
 </html>

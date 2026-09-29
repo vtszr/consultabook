@@ -28,6 +28,7 @@ function initFirebase(){
     }
     nid=appts.length?Math.max.apply(null,appts.map(function(a){return a.id||0;}))+1:1;
     if(loggedProf){ renderStats(loggedProf.id); renderAppts(loggedProf.id,ptab_); }
+    if(document.getElementById('pg-m').classList.contains('on')) searchMyAppts();
     if(currentView==='week') renderWeek();
   },function(e){console.error('appointments:',e.message);});
   };
@@ -66,16 +67,31 @@ function deleteApptFromFirebase(id){
 }
 
 // ── AUTH ───────────────────────────────────────────────────
+function prefillFromAccount(){
+  var u=auth&&auth.currentUser;if(!u)return;
+  var fn=document.getElementById('fn'),fe=document.getElementById('fe');
+  if(fn&&!fn.value&&u.displayName)fn.value=u.displayName;
+  if(fe&&u.email){fe.value=u.email;fe.readOnly=true;}
+  chk();
+}
 function onAuth(user){
   var btn=document.getElementById('auth-btn');
   if(apptRef){apptRef.off();apptRef=null;}
   appts=[];loggedProf=null;
   document.getElementById('p-portal').style.display='none';
   document.getElementById('p-login').style.display='flex';
-  if(!user){btn.textContent='Пријава (Google)';return;}
+  if(!user){
+    btn.textContent='Пријава (Google)';
+    var fe0=document.getElementById('fe'),fn0=document.getElementById('fn');
+    if(fe0){fe0.readOnly=false;fe0.value='';}
+    if(fn0)fn0.value='';
+    if(document.getElementById('pg-m').classList.contains('on'))searchMyAppts();
+    return;
+  }
   btn.textContent='Одјава · '+(user.displayName||user.email);
   var asStudent=function(){
     if(pendingProfLogin){pendingProfLogin=false;showToast('err','Нисте наставник','Овај налог нема приступ порталу за наставнике.');auth.signOut();return;}
+    prefillFromAccount();
     attachAppts(db.ref(DB_REF).orderByChild('uid').equalTo(user.uid));
   };
   db.ref('consultabook/profs/'+user.uid).once('value',function(snap){

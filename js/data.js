@@ -13,6 +13,8 @@ var DSR = ['','Понедељак','Уторак','Среда','Четвртак
 var MONTHS = ['Јануар','Фебруар','Март','Април','Мај','Јун','Јул','Август','Септембар','Октобар','Новембар','Децембар'];
 var DOWS = ['Пон','Уто','Сре','Чет','Пет','Суб','Нед'];
 var DB_REF = 'consultabook/appointments';
+var MAX_ACTIVE = 3;   // највише активних термина по студенту
+var CANCEL_HOURS = 2; // отказивање најкасније X сати пре почетка
 var db, auth, takenSlots={}, attachAppts, apptRef=null, pendingProfLogin=false;
 
 var DEPTS = [
@@ -52,16 +54,45 @@ function easterHolidays(y){
   for(var k=-2;k<=1;k++){var x=new Date(easter);x.setDate(easter.getDate()+k);r.push({m:x.getMonth(),d:x.getDate()});}
   return r;
 }
-function isHoliday(date){
-  var m=date.getMonth(), d=date.getDate(), y=date.getFullYear();
-  // Фиксни
+// Први дан државног празника (Нова година, Сретење, Празник рада, Дан примирја):
+// ако падне у недељу, нерадан је и први наредни радни дан.
+var SUNDAY_SHIFT = [{m:0,d:1},{m:1,d:15},{m:4,d:1},{m:10,d:11}];
+// 27. јануар (Свети Сава) је на многим факултетима радан дан; укључи по потреби.
+var CLOSE_ON_SVETI_SAVA = false;
+// Додатни нерадни периоди установе (формат 'ГГГГ-ММ-ДД'), нпр. зимски распуст, испитна недеља.
+var EXTRA_CLOSED = [
+  // {from:'2026-12-28', to:'2027-01-08'},
+  // {from:'2027-02-01', to:'2027-02-05'},
+];
+function inFixed(m,d){
   for(var i=0;i<FIXED_HOLIDAYS.length;i++){
     if(FIXED_HOLIDAYS[i].m===m && FIXED_HOLIDAYS[i].d===d) return true;
   }
-  // Ускрс
-  var easterDays = easterHolidays(y);
-  for(var j=0;j<easterDays.length;j++){
-    if(easterDays[j].m===m && easterDays[j].d===d) return true;
+  return false;
+}
+function shiftedHolidays(y){
+  var r=[];
+  SUNDAY_SHIFT.forEach(function(h){
+    var t=new Date(y,h.m,h.d);
+    if(t.getDay()!==0) return;
+    do{ t.setDate(t.getDate()+1); }while(inFixed(t.getMonth(),t.getDate()));
+    r.push({m:t.getMonth(),d:t.getDate()});
+  });
+  return r;
+}
+function isHoliday(date){
+  var m=date.getMonth(), d=date.getDate(), y=date.getFullYear();
+  if(inFixed(m,d)) return true;
+  if(CLOSE_ON_SVETI_SAVA && m===0 && d===27) return true;
+  var lists=[easterHolidays(y),shiftedHolidays(y)];
+  for(var k=0;k<lists.length;k++){
+    for(var j=0;j<lists[k].length;j++){
+      if(lists[k][j].m===m && lists[k][j].d===d) return true;
+    }
+  }
+  var key=fmtK(date);
+  for(var x=0;x<EXTRA_CLOSED.length;x++){
+    if(key>=EXTRA_CLOSED[x].from && key<=EXTRA_CLOSED[x].to) return true;
   }
   return false;
 }

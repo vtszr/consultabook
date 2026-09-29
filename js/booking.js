@@ -19,6 +19,8 @@ function getSlots(date){
   var bk=Object.keys(takenSlots).filter(function(k){return k.indexOf(sp.id+'_'+key+'_')===0;}).map(function(k){var t=k.split('_')[2];return t.substr(0,2)+':'+t.substr(2);});
   var all=[];
   sess.forEach(function(s){all=all.concat(genSlots(s.start,s.end));});
+  var m=date.getMonth();
+  var closed=(m===6||m===7||isHoliday(date)||isDateBlocked(sp.id,key)); // распуст, празник, блокиран датум
   var now=new Date();
   return all.map(function(s){
     var isPastSlot=false;
@@ -29,7 +31,7 @@ function getSlots(date){
       slotTime.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       isPastSlot=slotTime<=now;
     }
-    return {time:s.time,label:s.label,booked:bk.indexOf(s.time)>=0||isPastSlot};
+    return {time:s.time,label:s.label,booked:closed||bk.indexOf(s.time)>=0||isPastSlot};
   });
 }
 function hasAvail(date){ return getSlots(date).some(function(s){return !s.booked;}); }
@@ -193,7 +195,8 @@ function openB(id){
   updSum();chk();
   setTimeout(function(){renderCal();},10);
   document.getElementById('scont').innerHTML='<p class="no-slot">Прво изаберите датум.</p>';
-  ['fn','fi','fe','ft'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';}); 
+  ['fn','fi','fe','ft'].forEach(function(i){var el=document.getElementById(i);if(el)el.value='';});
+  prefillFromAccount(); 
   ['fd','fy'].forEach(function(i){document.getElementById(i).value='';});
 }
 
@@ -268,6 +271,7 @@ function chk(){
   document.getElementById('cbtn').disabled=!(sd&&st&&n&&i);
 }
 
+function apptStart(a){ return new Date(a.date+'T'+a.time+':00'); }
 function hasDuplicate(name,idx,profId){
   return appts.some(function(a){return a.pid===profId&&a.date>=fmtK(new Date())&&(a.idx===idx||a.name.toLowerCase()===name.toLowerCase());});
 }
@@ -275,6 +279,8 @@ function hasDuplicate(name,idx,profId){
 // ── CONFIRM BOOKING ───────────────────────────────────────────────────────────
 function confirmBook(){
   if(!auth||!auth.currentUser){showToast('err','Потребна пријава','Пријавите се Google налогом (горе десно).');return;}
+  var _act=appts.filter(function(a){return a.uid===auth.currentUser.uid&&apptStart(a)>new Date();}).length;
+  if(_act>=MAX_ACTIVE){showToast('err','Достигнут лимит','Можете имати највише '+MAX_ACTIVE+' активна термина. Откажите неки да бисте резервисали нови.');return;}
   var name=document.getElementById('fn').value.trim();
   var idx=document.getElementById('fi').value.trim();
   var dept=document.getElementById('fd').value;
@@ -314,6 +320,7 @@ function confirmBook(){
   document.getElementById('scont').innerHTML='<p class="no-slot">Изаберите нови датум.</p>';
   updSum();document.getElementById('cbtn').disabled=true;
   ['fn','fi','ft'].forEach(function(i){document.getElementById(i).value='';});
+  prefillFromAccount();
   ['fd','fy'].forEach(function(i){document.getElementById(i).value='';});
   if(loggedProf&&loggedProf.id===sp.id){renderStats(loggedProf.id);renderAppts(loggedProf.id,ptab_);}
   };
@@ -328,7 +335,6 @@ function confirmBook(){
 // ── МОЈЕ РЕЗЕРВАЦИЈЕ ──────────────────────────────────────────────────────────
 function searchMyAppts(){
   if(!auth||!auth.currentUser){document.getElementById('myr-results').innerHTML='<div class="myr-empty">Пријавите се (дугме горе десно) да видите своје резервације.</div>';return;}
-  var idx = document.getElementById('myr-idx').value.trim();
   var res = document.getElementById('myr-results');
   
 
@@ -336,7 +342,7 @@ function searchMyAppts(){
   mine.sort(function(a,b){ return (a.date+a.time).localeCompare(b.date+b.time); });
 
   if(!mine.length){
-    res.innerHTML='<div class="myr-empty">Нема резервација за индекс <strong>'+idx+'</strong>.</div>';
+    res.innerHTML='<div class="myr-empty">Немате заказаних термина.</div>';
     return;
   }
 
@@ -361,7 +367,7 @@ function searchMyAppts(){
         '</div>'+
         (isPast?
           '<span style="font-size:.68rem;color:var(--text3);flex-shrink:0;">Прошло</span>':
-          '<button class="myr-cancel" data-aid="'+a.id+'" data-idx="'+idx+'">Откажи</button>'
+          '<button class="myr-cancel" data-aid="'+a.id+'" data-idx="1">Откажи</button>'
         )+
       '</div>';
     }).join('');
@@ -379,6 +385,7 @@ function searchMyAppts(){
 function showMyrConfirm(id, idx){
   var a = appts.find(function(x){ return x.id===id; });
   if(!a) return;
+  if(apptStart(a)-new Date() < CANCEL_HOURS*3600000){showToast('err','Отказивање није могуће','Термин се може отказати најкасније '+CANCEL_HOURS+' сата пре почетка.');return;}
   var prof = professors.find(function(p){ return p.id===a.pid; });
   document.getElementById('confirm-msg').innerHTML =
     'Откажи термин код <strong>'+(prof?prof.name:'наставника')+'</strong>?<br>'+

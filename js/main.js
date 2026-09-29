@@ -52,9 +52,8 @@ document.addEventListener('DOMContentLoaded',function(){
     this.classList.add('on');
     document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
     document.getElementById('pg-m').classList.add('on');
+    searchMyAppts();
   });
-  document.getElementById('myr-btn').addEventListener('click',searchMyAppts);
-  document.getElementById('myr-idx').addEventListener('keydown',function(e){if(e.key==='Enter')searchMyAppts();});
 
   // Restore session
   // сесију води Firebase Auth

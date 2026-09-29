@@ -24,6 +24,16 @@ function showPortal(){
   var shortSubj = p.subject==='—' ? '' : p.subject.split(' · ')[0];
   document.getElementById('portal-subj').textContent = shortSubj + (shortSubj ? ' · ' : '') + p.office;
   renderStats(p.id);renderAppts(p.id,ptab_);
+  loadBlocked(p.id,function(){ renderBlockedList(p.id); });
+  var btn=document.getElementById('block-btn');
+  if(btn&&!btn._wired){
+    btn._wired=true;
+    btn.addEventListener('click',function(){
+      var d=document.getElementById('block-date').value;
+      if(!d){ showToast('err','Одабери датум',''); return; }
+      blockDate(loggedProf.id,d);
+    });
+  }
 }
 function renderStats(id){
   var all=appts.filter(function(a){return a.pid===id;}),
@@ -78,6 +88,48 @@ function renderAppts(id,f){
       if(a) showConfirm(aid, a.name, a.label);
     });
   });
+  addCommentBoxes();
+}
+
+// Напомена наставника уз сваки термин
+function addCommentBoxes(){
+  var L = document.getElementById('alist');
+  if(!L) return;
+  L.querySelectorAll('.acard').forEach(function(card, i){
+    var aid = card.querySelector('.delbtn') ? parseInt(card.querySelector('.delbtn').dataset.aid) : null;
+    if(!aid) return;
+    var appt = appts.find(function(a){ return a.id === aid; });
+    if(!appt) return;
+    // Add comment div
+    var existing = card.querySelector('.comment-area');
+    if(existing) return;
+    var commentDiv = document.createElement('div');
+    commentDiv.style.cssText = 'width:100%;padding-top:.5rem;border-top:1px solid var(--border);margin-top:.5rem;';
+    commentDiv.innerHTML =
+      '<div class="appt-comment' + (appt.comment ? ' has' : '') + '" data-aid="' + aid + '" style="cursor:pointer;font-size:.72rem;">' +
+        (appt.comment ? '💬 ' + appt.comment : '+ Додај коментар') +
+      '</div>' +
+      '<div class="comment-area" id="ca-' + aid + '">' +
+        '<textarea class="comment-input" rows="2" placeholder="Напомена за студента...">' + (appt.comment || '') + '</textarea>' +
+        '<button class="comment-save" data-aid="' + aid + '">Сачувај</button>' +
+      '</div>';
+    card.style.flexWrap = 'wrap';
+    card.appendChild(commentDiv);
+    // Toggle
+    commentDiv.querySelector('.appt-comment').addEventListener('click', function(){
+      var ca = document.getElementById('ca-' + aid);
+      ca.classList.toggle('open');
+    });
+    // Save
+    commentDiv.querySelector('.comment-save').addEventListener('click', function(){
+      var txt = commentDiv.querySelector('.comment-input').value.trim();
+      saveComment(aid, txt);
+      var lbl = commentDiv.querySelector('.appt-comment');
+      lbl.textContent = txt ? '💬 ' + txt : '+ Додај коментар';
+      lbl.classList.toggle('has', !!txt);
+      document.getElementById('ca-' + aid).classList.remove('open');
+    });
+  });
 }
 
 // ── CONFIRM MODAL ─────────────────────────────────────────────────────────────
@@ -109,7 +161,8 @@ function blockDate(profId, date){
   db.ref(DB_BLOCKED + '/' + profId).set(blockedDates[profId]);
   renderBlockedList(profId);
   renderAppts(profId, ptab_);
-  showToast('ok','Датум блокиран', date);
+  var n=appts.filter(function(a){return a.pid===profId&&a.date===date;}).length;
+  showToast('ok','Датум блокиран', n?('Већ заказано термина тог дана: '+n+'. Откажите их ручно.'):date);
 }
 
 function unblockDate(profId, date){

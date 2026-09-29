@@ -114,6 +114,12 @@ function onAuth(user){
 document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('auth-btn').addEventListener('click',function(){
     if(auth.currentUser){auth.signOut();return;}
-    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){showToast('err','Пријава није успела',e.code||'');});
+    if(signingIn)return;
+    signingIn=true;
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){
+      // затварање прозора и двоструки клик нису праве грешке
+      if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request')return;
+      showToast('err','Пријава није успела',e.code||'');
+    }).then(function(){signingIn=false;});
   });
 });

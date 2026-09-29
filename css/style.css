@@ -22,6 +22,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:.9r
 .rtog{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:40px;padding:3px;gap:3px;flex-shrink:0;}
 .rbtn{padding:.4rem 1.15rem;border-radius:40px;border:none;background:transparent;color:var(--text2);font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .22s;}
 .rbtn.on{background:var(--accent);color:#0f1420;font-weight:800;}
+#auth-btn{background:var(--accent);color:#0f1420;border:none;border-radius:40px;padding:.5rem 1.1rem;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:900;cursor:pointer;white-space:nowrap;transition:opacity .2s,transform .15s;}
+#auth-btn:hover{opacity:.88;}
+#auth-btn:active{transform:scale(.97);}
 
 /* LAYOUT */
 main{padding:1.75rem 2rem;max-width:1400px;margin:0 auto;}
@@ -266,7 +269,10 @@ body.light .fg select option{background:#fff;}
 /* ── MOBILE RESPONSIVE ────────────────────────────────────────────────────── */
 @media(max-width:768px){
   /* Header */
-  header{padding:.75rem 1rem;gap:.5rem;}
+  header{padding:.6rem 1rem;gap:.5rem;flex-wrap:wrap;}
+  .rtog{order:4;flex-basis:100%;}
+  .rbtn{flex:1;white-space:nowrap;}
+  #auth-btn{margin-left:auto;max-width:48vw;overflow:hidden;text-overflow:ellipsis;}
   .logo img{height:34px;}
   .logo-t{font-size:.85rem;}
   .logo-s{display:none;}

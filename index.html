@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="sr">
+<html lang="sr-Cyrl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>КонсултаБук — ВТШ Зрењанин</title>
 <link rel="icon" type="image/png" href="img/logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Nunito:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Exo+2:wght@500;600;700&family=Nunito:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -51,7 +51,7 @@
 
 <div id="pg-s" class="pg on">
   <div id="vlist">
-    <div class="sh"><h2>Резервишите консултацију</h2><p>Изаберите наставника — картице или недељни приказ.</p><div class="al"></div></div>
+    <div class="sh"><h2>Резервишите консултацију</h2><p>Изаберите наставника — картице или приказ по смеру.</p><div class="al"></div></div>
     <div class="topbar">
       <div class="sbox">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -140,7 +140,7 @@
         <h3>Портал за професоре</h3>
         <p>Пријавите се да видите своје термине</p>
       </div>
-      <div class="login-err" id="login-err">Погрешно корисничко име или лозинка.</div>
+      <div class="login-err" id="login-err">Погрешан мејл или лозинка.</div>
       <div class="fg"><label>Мејл адреса</label><input type="text" id="l-user" placeholder="ime.prezime@vtszr.edu.rs" autocomplete="username"></div>
       <div class="fg"><label>Лозинка</label><input type="password" id="l-pass" placeholder="Лозинка" autocomplete="current-password"></div>
       <label class="remember-row"><input type="checkbox" id="remember-prof"> Запамти ме</label>
@@ -166,8 +166,12 @@
       <h3>Блокирај термин</h3>
       <div class="block-row">
         <input type="date" id="block-date">
-        <button class="block-btn" id="block-btn">Блокирај датум</button>
+        <select id="block-from" aria-label="Од"></select>
+        <span class="block-dash">–</span>
+        <select id="block-to" aria-label="До"></select>
+        <button class="block-btn" id="block-btn">Блокирај</button>
       </div>
+      <p class="block-hint">Ако не унесеш време „од – до“, блокира се цео дан.</p>
       <div class="blocked-list" id="blocked-list"></div>
     </div>
 
@@ -200,11 +204,11 @@
 
 <!-- CONFIRM MODAL -->
 <div id="confirm-modal">
-  <div class="confirm-box">
+  <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
     <div class="confirm-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg>
     </div>
-    <div class="confirm-title">Откажи термин?</div>
+    <div class="confirm-title" id="confirm-title">Откажи термин?</div>
     <div class="confirm-msg" id="confirm-msg">Да ли сте сигурни да желите да откажете овај термин?</div>
     <div class="confirm-btns">
       <button class="confirm-no" id="confirm-no">Одустани</button>

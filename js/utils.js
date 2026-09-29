@@ -7,7 +7,9 @@ function ini(n){ return n.replace(/др |мр /g,'').trim().split(/\s+/).slice(0
 function isT(d){ var t=new Date(); return d.getFullYear()===t.getFullYear()&&d.getMonth()===t.getMonth()&&d.getDate()===t.getDate(); }
 function isP(d){ var t=new Date(); t.setHours(0,0,0,0); return d<t; }
 function sameD(a,b){ return a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
-function fmtD(d){ return d.toLocaleDateString('sr-Latn-RS',{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+function fmtDate(d,opts){ return d.toLocaleDateString('sr-Cyrl-RS',opts); }
+function fmtD(d){ return fmtDate(d,{weekday:'long',day:'numeric',month:'long',year:'numeric'}); }
+function fmtDShort(d,withYear){ var o={weekday:'short',day:'numeric',month:'short'}; if(withYear)o.year='numeric'; return fmtDate(d,o); }
 function fmtK(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
 
 // ── LOADER ────────────────────────────────────────────────────────────────────

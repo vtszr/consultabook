@@ -31,7 +31,8 @@ function getSlots(date){
       slotTime.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       isPastSlot=slotTime<=now;
     }
-    return {time:s.time,label:s.label,booked:closed||bk.indexOf(s.time)>=0||isPastSlot};
+    var endT=s.label.split('–')[1].trim();
+    return {time:s.time,label:s.label,booked:closed||bk.indexOf(s.time)>=0||isPastSlot||isSlotBlocked(sp.id,key,s.time,endT)};
   });
 }
 function hasAvail(date){ return getSlots(date).some(function(s){return !s.booked;}); }
@@ -200,7 +201,7 @@ function updSum(){
   var el=document.getElementById('ssum');
   if(!sd&&!st){el.innerHTML='<span class="sem">Изаберите датум и термин испод.</span>';return;}
   var h='';
-  if(sd)h+='<div class="ssi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="12" height="12"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><strong>'+DSR[sd.getDay()]+', '+fmtD(sd)+'</strong></div>';
+  if(sd)h+='<div class="ssi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="12" height="12"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><strong>'+fmtD(sd)+'</strong></div>';
   if(st){var sl=getSlots(sd).find(function(s){return s.time===st;});h+='<div class="ssi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="12" height="12"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><strong>'+(sl?sl.label:st)+'</strong></div>';}
   el.innerHTML=h||'<span class="sem">Изаберите датум и термин испод.</span>';
 }
@@ -251,7 +252,7 @@ function confirmBook(){
     '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><strong>'+esc(name)+'</strong> ('+esc(idx)+')</span></div>'+
     '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Наставник: <strong>'+sp.name+'</strong></span></div>'+
     '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Термин: <strong>'+sl.label+'</strong></span></div>'+
-    '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="4" width="18" height="18" rx="2"/></svg><span><strong>'+DSR[sd.getDay()]+', '+fmtD(sd)+'</strong></span></div>';
+    '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="4" width="18" height="18" rx="2"/></svg><span><strong>'+fmtD(sd)+'</strong></span></div>';
   document.getElementById('ccard').classList.add('on');
   launchConfetti();
   showToast('ok','Термин је резервисан!',sl.label+' — '+DSR[sd.getDay()]+', '+sd.getDate()+'. '+MONTHS[sd.getMonth()]);
@@ -294,7 +295,7 @@ function searchMyAppts(){
       var d = new Date(a.date+'T00:00:00');
       var prof = professors.find(function(p){ return p.id===a.pid; });
       var isPast = isP(d)&&!isT(d);
-      var dstr = d.toLocaleDateString('sr-Latn-RS',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+      var dstr = fmtDShort(d,true);
       var timePart = a.label ? a.label.split('–')[0].trim() : a.time;
       return '<div class="myr-card'+(isPast?' past':'')+'">'+
         '<div class="myr-time"><div class="t">'+esc(timePart)+'</div><div class="d">'+dstr+'</div></div>'+

@@ -89,8 +89,10 @@ function deleteApptFromFirebase(id){
   var r=db.ref(DB_REF+'/'+String(id));
   r.once('value',function(snap){
     var a=snap.val();
-    if(a&&a.lock) db.ref('consultabook/slots/'+a.lock).remove();
-    r.remove();
+    var upd={};
+    upd[DB_REF+'/'+String(id)]=null;
+    if(a&&a.lock) upd['consultabook/slots/'+a.lock]=null;
+    db.ref().update(upd);
   });
 }
 
@@ -109,6 +111,7 @@ function onAuth(user){
   // без "Запамти ме": ако пријава потиче из ранијег таба, одјави корисника
   if(user&&!getKeep()&&!hasSession()){auth.signOut();return;}
   var btn=document.getElementById('auth-btn');
+  btn.style.display='';
   var rw=document.getElementById('remember-wrap');if(rw)rw.style.display=user?'none':'';
   if(apptRef){apptRef.off();apptRef=null;}
   appts=[];loggedProf=null;

@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('clr-btn').addEventListener('click',clearSearch);
   document.querySelectorAll('.fbtn').forEach(function(b){b.addEventListener('click',function(){sf(b.dataset.day,b);});});
   document.getElementById('view-card').addEventListener('click',function(){setView('card');});
-  document.getElementById('view-week').addEventListener('click',function(){setView('week');});
   document.getElementById('view-dept').addEventListener('click',function(){setView('dept');});
   document.getElementById('cal-prev').addEventListener('click',function(){cm(-1);});
   document.getElementById('cal-next').addEventListener('click',function(){cm(1);});

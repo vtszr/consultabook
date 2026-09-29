@@ -40,11 +40,9 @@ function isProfDay(date){ return sp&&sp.sessions.some(function(s){return s.day==
 // ── VIEW TOGGLE ───────────────────────────────────────────────────────────────
 function setView(v){
   currentView=v;
-  ['card','week','dept'].forEach(function(id){var b=document.getElementById('view-'+id);if(b)b.classList.toggle('on',id===v);});
+  ['card','dept'].forEach(function(id){var b=document.getElementById('view-'+id);if(b)b.classList.toggle('on',id===v);});
   document.getElementById('pgrid').style.display=v==='card'?'':'none';
-  document.getElementById('week-view').style.display=v==='week'?'':'none';
   document.getElementById('dept-view').style.display=v==='dept'?'':'none';
-  if(v==='week')renderWeek();
   if(v==='dept'){
     var q=document.getElementById('sq').value.toLowerCase().trim();
     renderDept(professors.filter(function(p){
@@ -75,7 +73,6 @@ function filt(){
     return matchDay && matchQ;
   });
   renderG(list);
-  if(currentView==='week')renderWeek();
   if(currentView==='dept')renderDept(list);
 }
 function clearSearch(){document.getElementById('sq').value='';filt();}
@@ -130,48 +127,6 @@ function renderDept(list){
   wrap.querySelectorAll('.pcard').forEach(function(c){c.addEventListener('click',function(){openB(parseInt(c.dataset.pid));});});
 }
 
-// ── WEEKLY VIEW ───────────────────────────────────────────────────────────────
-function renderWeek(){
-  var wrap=document.getElementById('week-view');
-  var times={};
-  professors.forEach(function(p){p.sessions.forEach(function(s){genSlots(s.start,s.end).forEach(function(sl){times[sl.time]=true;});});});
-  var timeKeys=Object.keys(times).sort();
-  var today=new Date();today.setHours(0,0,0,0);
-  var mon=new Date(today);mon.setDate(today.getDate()-((today.getDay()+6)%7));
-  var weekDates={};
-  [1,2,3,4,5].forEach(function(d){var date=new Date(mon);date.setDate(mon.getDate()+(d-1));weekDates[d]=date;});
-  var html='<div class="week-wrap"><table class="week-table"><thead><tr><th>Време</th>';
-  [1,2,3,4,5].forEach(function(d){html+='<th>'+DSR[d]+'</th>';});
-  html+='</tr></thead><tbody>';
-  timeKeys.forEach(function(time){
-    html+='<tr><td>'+time+'</td>';
-    [1,2,3,4,5].forEach(function(day){
-      html+='<td>';
-      professors.forEach(function(p){
-        var hasSess=p.sessions.some(function(s){if(s.day!==day)return false;return genSlots(s.start,s.end).some(function(sl){return sl.time===time;});});
-        if(!hasSess)return;
-        var date=weekDates[day],key=fmtK(date);
-        var isBooked=!!takenSlots[p.id+'_'+key+'_'+time.replace(':','')];
-        var isPast=isP(date)&&!isT(date);
-        if(isT(date)){var tp=time.split(':'),tt=new Date();tt.setHours(+tp[0],+tp[1],0,0);if(tt<=new Date())isPast=true;}
-        var closed=date.getMonth()===6||date.getMonth()===7||isHoliday(date)||isDateBlocked(p.id,key);
-        if(isBooked||isPast||closed){
-          html+='<div class="week-slot taken"><span class="ws-name">'+ini(p.name)+'</span></div>';
-        } else {
-          html+='<div class="week-slot free" data-pid="'+p.id+'" data-day="'+day+'" data-time="'+time+'" data-date="'+key+'"><span class="ws-name">'+ini(p.name)+'</span><div style="font-size:.6rem;color:var(--text2);margin-top:1px;">'+p.name.split(' ').slice(-1)[0]+'</div></div>';
-        }
-      });
-      html+='</td>';
-    });
-    html+='</tr>';
-  });
-  html+='</tbody></table><div class="week-legend"><span><div class="wl-dot" style="background:rgba(32,217,160,0.3);border:1px solid rgba(32,217,160,0.4);"></div>Слободан</span><span><div class="wl-dot" style="background:rgba(244,63,94,0.15);border:1px solid rgba(244,63,94,0.2);"></div>Заузет</span></div></div>';
-  wrap.innerHTML=html;
-  wrap.querySelectorAll('.week-slot.free').forEach(function(el){
-    el.addEventListener('click',function(){openBWeek(parseInt(el.dataset.pid),new Date(el.dataset.date+'T00:00:00'),el.dataset.time);});
-  });
-}
-
 // ── BOOKING ───────────────────────────────────────────────────────────────────
 function openB(id){
   sp=professors.find(function(p){return p.id===id;});sd=null;st=null;
@@ -191,18 +146,11 @@ function openB(id){
   ['fd','fy'].forEach(function(i){document.getElementById(i).value='';});
 }
 
-function openBWeek(pid,date,time){
-  openB(pid);
-  sd=date;st=time;cy=date.getFullYear();cm_=date.getMonth();
-  setTimeout(function(){renderCal();renderSlots();updSum();chk();},20);
-}
-
 function backList(){
   sp=null;sd=null;st=null;
   document.getElementById('vbook').classList.remove('on');
   document.getElementById('vlist').style.display='';
   renderG(professors);
-  if(currentView==='week')renderWeek();
 }
 
 // ── CALENDAR ─────────────────────────────────────────────────────────────────

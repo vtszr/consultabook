@@ -31,7 +31,8 @@ function getSlots(date){
       slotTime.setHours(parseInt(parts[0]),parseInt(parts[1]),0,0);
       isPastSlot=slotTime<=now;
     }
-    return {time:s.time,label:s.label,booked:closed||bk.indexOf(s.time)>=0||isPastSlot};
+    var endT=s.label.split('–')[1].trim();
+    return {time:s.time,label:s.label,booked:closed||bk.indexOf(s.time)>=0||isPastSlot||isSlotBlocked(sp.id,key,s.time,endT)};
   });
 }
 function hasAvail(date){ return getSlots(date).some(function(s){return !s.booked;}); }

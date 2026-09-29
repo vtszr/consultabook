@@ -1,0 +1,61 @@
+// Улаз: избор улоге и повезивање догађаја (DOMContentLoaded)
+
+// ── ROLE ──────────────────────────────────────────────────────────────────────
+function role(r){
+  document.querySelectorAll('.rbtn').forEach(function(b,i){b.classList.toggle('on',i===(r==='student'?0:1));});
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.getElementById('pg-'+r[0]).classList.add('on');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  initFirebase();
+  var n=new Date();cy=n.getFullYear();cm_=n.getMonth();
+  renderG(professors);
+  initTheme();
+
+  document.getElementById('btn-student').addEventListener('click',function(){role('student');});
+  document.getElementById('btn-professor').addEventListener('click',function(){role('professor');});
+  document.getElementById('back-btn').addEventListener('click',backList);
+  document.getElementById('sq').addEventListener('input',filt);
+  document.getElementById('clr-btn').addEventListener('click',clearSearch);
+  document.querySelectorAll('.fbtn').forEach(function(b){b.addEventListener('click',function(){sf(b.dataset.day,b);});});
+  document.getElementById('view-card').addEventListener('click',function(){setView('card');});
+  document.getElementById('view-week').addEventListener('click',function(){setView('week');});
+  document.getElementById('view-dept').addEventListener('click',function(){setView('dept');});
+  document.getElementById('cal-prev').addEventListener('click',function(){cm(-1);});
+  document.getElementById('cal-next').addEventListener('click',function(){cm(1);});
+  ['fn','fi','fd','fy','ft'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',chk);});
+  document.getElementById('fn').addEventListener('input',function(){document.getElementById('dup-warn').classList.remove('on');});
+  document.getElementById('cbtn').addEventListener('click',confirmBook);
+  document.getElementById('login-btn').addEventListener('click',doLogin);
+  document.getElementById('l-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  document.getElementById('logout-btn').addEventListener('click',doLogout);
+  document.querySelectorAll('.tpill').forEach(function(b){b.addEventListener('click',function(){ptab(b.dataset.tab,b);});});
+  document.getElementById('confirm-yes').addEventListener('click',function(){
+    if(pendingDeleteId!==null){
+      appts=appts.filter(function(a){return a.id!==pendingDeleteId;});
+      deleteApptFromFirebase(pendingDeleteId);
+      showToast('ok','Термин је отказан','');
+      if(loggedProf){renderStats(loggedProf.id);renderAppts(loggedProf.id,ptab_);}
+      if(pendingMyrIdx){searchMyAppts();}
+      pendingMyrIdx=null;
+    }
+    hideConfirm();
+  });
+  document.getElementById('confirm-no').addEventListener('click',hideConfirm);
+  document.getElementById('confirm-modal').addEventListener('click',function(e){if(e.target===this)hideConfirm();});
+
+  // Моје резервације
+  document.getElementById('btn-student2').addEventListener('click',function(){
+    document.querySelectorAll('.rbtn').forEach(function(b){b.classList.remove('on');});
+    this.classList.add('on');
+    document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+    document.getElementById('pg-m').classList.add('on');
+  });
+  document.getElementById('myr-btn').addEventListener('click',searchMyAppts);
+  document.getElementById('myr-idx').addEventListener('keydown',function(e){if(e.key==='Enter')searchMyAppts();});
+
+  // Restore session
+  // сесију води Firebase Auth
+});

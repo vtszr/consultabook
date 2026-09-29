@@ -270,6 +270,7 @@ function hasDuplicate(name,idx,profId){
 // ── CONFIRM BOOKING ───────────────────────────────────────────────────────────
 function confirmBook(){
   if(!auth||!auth.currentUser){showToast('err','Потребна пријава','Пријавите се Google налогом (горе десно).');return;}
+  if(loggedProf){showToast('err','Пријављени сте као наставник','Одјавите се и пријавите Google налогом да бисте резервисали термин.');return;}
   var _act=appts.filter(function(a){return a.uid===auth.currentUser.uid&&apptStart(a)>new Date();}).length;
   if(_act>=MAX_ACTIVE){showToast('err','Достигнут лимит','Можете имати највише '+MAX_ACTIVE+' активна термина. Откажите неки да бисте резервисали нови.');return;}
   var name=document.getElementById('fn').value.trim();
@@ -324,6 +325,7 @@ function confirmBook(){
 
 // ── МОЈЕ РЕЗЕРВАЦИЈЕ ──────────────────────────────────────────────────────────
 function searchMyAppts(){
+  if(loggedProf){document.getElementById('myr-results').innerHTML='<div class="myr-empty">Пријављени сте као наставник. Ваше термине видите у порталу за наставнике.</div>';return;}
   if(!auth||!auth.currentUser){document.getElementById('myr-results').innerHTML='<div class="myr-empty">Пријавите се (дугме горе десно) да видите своје резервације.</div>';return;}
   var res = document.getElementById('myr-results');
   

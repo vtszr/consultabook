@@ -7,7 +7,11 @@ function doLogin(){
   var err=document.getElementById('login-err');
   err.classList.remove('on');
   pendingProfLogin=true;
-  auth.signInWithEmailAndPassword(email,pass).catch(function(){
+  markSession();
+  // наставници се увек пријављују само за време трајања таба
+  auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).then(function(){
+    return auth.signInWithEmailAndPassword(email,pass);
+  }).catch(function(){
     pendingProfLogin=false;err.classList.add('on');document.getElementById('l-pass').value='';
   });
 }

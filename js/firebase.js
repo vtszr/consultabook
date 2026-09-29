@@ -46,8 +46,14 @@ function initFirebase(){
     if(loggedProf)renderBlockedList(loggedProf.id);
   },function(e){console.error('blocked:',e.message);});
   auth=firebase.auth();
-  // пријава важи само док је таб отворен (затварањем таба корисник се одјављује)
-  auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(e){console.error('persistence:',e.code);});
+  // подразумевано пријава важи само док је таб отворен; "Запамти ме" је чува и после затварања
+  setRemember(getRemember());
+  var cb=document.getElementById('remember-cb');
+  cb.checked=getRemember();
+  cb.addEventListener('change',function(){
+    try{localStorage.setItem('vtszr_remember',cb.checked?'1':'0');}catch(e){}
+    setRemember(cb.checked);
+  });
   auth.onAuthStateChanged(onAuth);
   // Connection status
   firebase.database().ref('.info/connected').on('value',function(snap){
@@ -62,6 +68,12 @@ function initFirebase(){
       document.getElementById('offline-bar').classList.add('show');
     }
   });
+}
+
+function getRemember(){try{return localStorage.getItem('vtszr_remember')==='1';}catch(e){return false;}}
+function setRemember(on){
+  var P=firebase.auth.Auth.Persistence;
+  return auth.setPersistence(on?P.LOCAL:P.SESSION).catch(function(e){console.error('persistence:',e.code);});
 }
 
 function saveApptToFirebase(appt){
@@ -84,8 +96,14 @@ function prefillFromAccount(){
   if(fe&&u.email){fe.value=u.email;fe.readOnly=true;}
   chk();
 }
+// Сесија таба: означава да је пријава направљена у овом табу (sessionStorage нестаје затварањем таба)
+function markSession(){try{sessionStorage.setItem('vtszr_active','1');}catch(e){}}
+function hasSession(){try{return sessionStorage.getItem('vtszr_active')==='1';}catch(e){return true;}}
 function onAuth(user){
+  // без "Запамти ме": ако пријава потиче из ранијег таба, одјави корисника
+  if(user&&!getRemember()&&!hasSession()){auth.signOut();return;}
   var btn=document.getElementById('auth-btn');
+  document.getElementById('remember-wrap').style.display=user?'none':'';
   if(apptRef){apptRef.off();apptRef=null;}
   appts=[];loggedProf=null;
   document.getElementById('p-portal').style.display='none';
@@ -118,6 +136,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(auth.currentUser){auth.signOut();return;}
     if(signingIn)return;
     signingIn=true;
+    markSession();
     auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){
       // затварање прозора и двоструки клик нису праве грешке
       if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request')return;

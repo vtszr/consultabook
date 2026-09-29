@@ -37,17 +37,6 @@ function getSlots(date){
 function hasAvail(date){ return getSlots(date).some(function(s){return !s.booked;}); }
 function isProfDay(date){ return sp&&sp.sessions.some(function(s){return s.day===date.getDay();}); }
 
-function weekOcc(prof){
-  var today=new Date(),mon=new Date(today);
-  mon.setDate(today.getDate()-((today.getDay()+6)%7));mon.setHours(0,0,0,0);
-  return prof.sessions.map(function(sess){
-    var all=genSlots(sess.start,sess.end),d=new Date(mon);
-    d.setDate(mon.getDate()+(sess.day-1+7)%7);
-    var bk=appts.filter(function(a){return a.pid===prof.id&&a.date===fmtK(d);}).length;
-    return {day:sess.day,booked:bk,total:all.length,start:sess.start,end:sess.end};
-  });
-}
-
 // ── VIEW TOGGLE ───────────────────────────────────────────────────────────────
 function setView(v){
   currentView=v;
@@ -164,7 +153,9 @@ function renderWeek(){
         var date=weekDates[day],key=fmtK(date);
         var isBooked=!!takenSlots[p.id+'_'+key+'_'+time.replace(':','')];
         var isPast=isP(date)&&!isT(date);
-        if(isBooked||isPast){
+        if(isT(date)){var tp=time.split(':'),tt=new Date();tt.setHours(+tp[0],+tp[1],0,0);if(tt<=new Date())isPast=true;}
+        var closed=date.getMonth()===6||date.getMonth()===7||isHoliday(date)||isDateBlocked(p.id,key);
+        if(isBooked||isPast||closed){
           html+='<div class="week-slot taken"><span class="ws-name">'+ini(p.name)+'</span></div>';
         } else {
           html+='<div class="week-slot free" data-pid="'+p.id+'" data-day="'+day+'" data-time="'+time+'" data-date="'+key+'"><span class="ws-name">'+ini(p.name)+'</span><div style="font-size:.6rem;color:var(--text2);margin-top:1px;">'+p.name.split(' ').slice(-1)[0]+'</div></div>';
@@ -202,7 +193,7 @@ function openB(id){
 
 function openBWeek(pid,date,time){
   openB(pid);
-  sd=date;st=time;
+  sd=date;st=time;cy=date.getFullYear();cm_=date.getMonth();
   setTimeout(function(){renderCal();renderSlots();updSum();chk();},20);
 }
 
@@ -286,14 +277,13 @@ function confirmBook(){
   var dept=document.getElementById('fd').value;
   var year=document.getElementById('fy').value;
   var topic=document.getElementById('ft').value.trim();
-  name=esc(name);idx=esc(idx);topic=esc(topic);
   var dupWarn=document.getElementById('dup-warn');
   if(!name||!idx||!sd||!st){showToast('err','Недостају подаци','Попуните обавезна поља.');return;}
   if(hasDuplicate(name,idx,sp.id)){dupWarn.textContent='Студент '+name+' ('+idx+') већ има резервисан термин код овог наставника!';dupWarn.classList.add('on');return;}
   dupWarn.classList.remove('on');
   var slots=getSlots(sd),sl=slots.find(function(s){return s.time===st;});
   if(!sl||sl.booked){showToast('err','Термин заузет','Изаберите другачији термин.');renderSlots();return;}
-  var email=document.getElementById('fe')?document.getElementById('fe').value.trim():'';email=esc(email);
+  var email=document.getElementById('fe')?document.getElementById('fe').value.trim():'';
   var appt={id:Date.now(),pid:sp.id,name:name,idx:idx,email:email,dept:dept,year:year,topic:topic||'Општа консултација',date:fmtK(sd),time:st,label:sl.label};
   var lockKey=sp.id+'_'+fmtK(sd)+'_'+st.replace(':','');
   appt.lock=lockKey;
@@ -309,7 +299,7 @@ function confirmBook(){
   document.getElementById('gcalw').style.display='block';
 
   document.getElementById('ccard-body').innerHTML=
-    '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><strong>'+name+'</strong> ('+idx+')</span></div>'+
+    '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span><strong>'+esc(name)+'</strong> ('+esc(idx)+')</span></div>'+
     '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Наставник: <strong>'+sp.name+'</strong></span></div>'+
     '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Термин: <strong>'+sl.label+'</strong></span></div>'+
     '<div class="conf-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="11" height="11"><rect x="3" y="4" width="18" height="18" rx="2"/></svg><span><strong>'+DSR[sd.getDay()]+', '+fmtD(sd)+'</strong></span></div>';
@@ -357,17 +347,17 @@ function searchMyAppts(){
       var dstr = d.toLocaleDateString('sr-Latn-RS',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
       var timePart = a.label ? a.label.split('–')[0].trim() : a.time;
       return '<div class="myr-card'+(isPast?' past':'')+'">'+
-        '<div class="myr-time"><div class="t">'+timePart+'</div><div class="d">'+dstr+'</div></div>'+
+        '<div class="myr-time"><div class="t">'+esc(timePart)+'</div><div class="d">'+dstr+'</div></div>'+
         '<div class="myr-div"></div>'+
         '<div class="myr-info">'+
           '<div class="myr-prof">'+(prof?prof.name:'Професор')+'</div>'+
           '<div class="myr-subj">'+(prof?prof.office:'')+'</div>'+
-          '<div class="myr-topic">'+a.topic+(a.dept?' · '+a.dept:'')+'</div>'+
-          (a.comment?'<div class="myr-topic" style="color:var(--accent);">💬 '+a.comment+'</div>':'')+
+          '<div class="myr-topic">'+esc(a.topic)+(a.dept?' · '+esc(a.dept):'')+'</div>'+
+          (a.comment?'<div class="myr-topic" style="color:var(--accent);">💬 '+esc(a.comment)+'</div>':'')+
         '</div>'+
         (isPast?
           '<span style="font-size:.68rem;color:var(--text3);flex-shrink:0;">Прошло</span>':
-          '<button class="myr-cancel" data-aid="'+a.id+'" data-idx="1">Откажи</button>'
+          '<button class="myr-cancel" data-aid="'+Number(a.id)+'">Откажи</button>'
         )+
       '</div>';
     }).join('');
@@ -375,23 +365,20 @@ function searchMyAppts(){
   // Wire cancel buttons
   res.querySelectorAll('.myr-cancel').forEach(function(b){
     b.addEventListener('click',function(){
-      var aid = parseInt(b.dataset.aid);
-      var bidx = b.dataset.idx;
-      showMyrConfirm(aid, bidx);
+      showMyrConfirm(parseInt(b.dataset.aid));
     });
   });
 }
 
-function showMyrConfirm(id, idx){
+function showMyrConfirm(id){
   var a = appts.find(function(x){ return x.id===id; });
   if(!a) return;
   if(apptStart(a)-new Date() < CANCEL_HOURS*3600000){showToast('err','Отказивање није могуће','Термин се може отказати најкасније '+CANCEL_HOURS+' сата пре почетка.');return;}
   var prof = professors.find(function(p){ return p.id===a.pid; });
   document.getElementById('confirm-msg').innerHTML =
     'Откажи термин код <strong>'+(prof?prof.name:'наставника')+'</strong>?<br>'+
-    '<span style="color:var(--accent);font-size:.8rem;">'+(a.label||a.time)+'</span>';
+    '<span style="color:var(--accent);font-size:.8rem;">'+esc(a.label||a.time)+'</span>';
   pendingDeleteId = id;
-  pendingMyrIdx = idx;
+  pendingMyrIdx = true;
   document.getElementById('confirm-modal').classList.add('show');
 }
-var pendingMyrIdx = null;

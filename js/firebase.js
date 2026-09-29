@@ -26,7 +26,6 @@ function initFirebase(){
         if(data[key] && data[key].id) appts.push(data[key]);
       });
     }
-    nid=appts.length?Math.max.apply(null,appts.map(function(a){return a.id||0;}))+1:1;
     if(loggedProf){ renderStats(loggedProf.id); renderAppts(loggedProf.id,ptab_); }
     if(document.getElementById('pg-m').classList.contains('on')) searchMyAppts();
     if(currentView==='week') renderWeek();
@@ -37,6 +36,15 @@ function initFirebase(){
     if(sp&&document.getElementById('vbook').classList.contains('on')){renderCal();renderSlots();}
     if(currentView==='week')renderWeek();
   });
+  // Блокирани датуми — потребни и студентима (календар), не само наставнику
+  db.ref(DB_BLOCKED).on('value',function(snap){
+    var v=snap.val()||{};
+    blockedDates={};
+    Object.keys(v).forEach(function(pid){blockedDates[pid]=Object.values(v[pid]||{});});
+    if(sp&&document.getElementById('vbook').classList.contains('on')){renderCal();renderSlots();}
+    if(currentView==='week')renderWeek();
+    if(loggedProf)renderBlockedList(loggedProf.id);
+  },function(e){console.error('blocked:',e.message);});
   auth=firebase.auth();
   auth.onAuthStateChanged(onAuth);
   // Connection status

@@ -24,7 +24,7 @@ function showPortal(){
   var shortSubj = p.subject==='—' ? '' : p.subject.split(' · ')[0];
   document.getElementById('portal-subj').textContent = shortSubj + (shortSubj ? ' · ' : '') + p.office;
   renderStats(p.id);renderAppts(p.id,ptab_);
-  loadBlocked(p.id,function(){ renderBlockedList(p.id); });
+  renderBlockedList(p.id);
   var btn=document.getElementById('block-btn');
   if(btn&&!btn._wired){
     btn._wired=true;
@@ -46,8 +46,25 @@ function renderStats(id){
     '<div class="sc"><div class="sc-l">Предстојеће</div><div class="sc-v">'+upc.length+'</div></div>'+
     '<div class="sc"><div class="sc-l">Прошли</div><div class="sc-v">'+pas.length+'</div></div>';
 }
+// Брисање прошлих термина (и њихових резервација слота) за пријављеног наставника
+function purgePast(){
+  if(!loggedProf)return;
+  var today=fmtK(new Date());
+  var old=appts.filter(function(a){return a.pid===loggedProf.id&&a.date<today;});
+  if(!old.length){showToast('err','Нема прошлих термина','');return;}
+  if(!confirm('Трајно обрисати '+old.length+' прошлих термина?'))return;
+  var upd={};
+  old.forEach(function(a){
+    upd[DB_REF+'/'+String(a.id)]=null;
+    if(a.lock)upd['consultabook/slots/'+a.lock]=null;
+  });
+  db.ref().update(upd).then(function(){
+    showToast('ok','Прошли термини обрисани','Обрисано: '+old.length);
+  }).catch(function(e){showToast('err','Брисање није успело',e.code||'');});
+}
 function ptab(t,btn){
   ptab_=t;
+  document.getElementById('purge-row').style.display=t==='proslo'?'':'none';
   document.querySelectorAll('.tpill').forEach(function(b){b.classList.remove('on');});
   btn.classList.add('on');
   if(loggedProf)renderAppts(loggedProf.id,ptab_);
@@ -71,12 +88,12 @@ function renderAppts(id,f){
     var badge=today?'<span class="abg bg-t">Данас</span>':past?'<span class="abg bg-p">Прошло</span>':'<span class="abg bg-u">Предстојеће</span>';
     var expBadge=past?'<span class="exp-badge">истекло</span>':'';
     return '<div class="acard" style="'+(past?'opacity:.65;':'')+'">'
-      +'<div class="at"><div class="tm">'+a.label.split('–')[0].split('-')[0].trim()+'</div><div class="dt">'+dstr+'</div></div>'
+      +'<div class="at"><div class="tm">'+esc((a.label||a.time).split('–')[0].split('-')[0].trim())+'</div><div class="dt">'+dstr+'</div></div>'
       +'<div class="adv"></div>'
-      +'<div class="ai"><div class="ai-n">'+a.name+' <span style="color:var(--text3);font-weight:400;font-size:.68rem;">'+a.idx+'</span>'+(a.email?' <span style="font-size:.65rem;color:var(--accent);">✉ '+a.email+'</span>':'')+'</div>'
-      +'<div class="ai-t">'+a.topic+(a.year?' · '+a.year:'')+expBadge+'</div></div>'
+      +'<div class="ai"><div class="ai-n">'+esc(a.name)+' <span style="color:var(--text3);font-weight:400;font-size:.68rem;">'+esc(a.idx)+'</span>'+(a.email?' <span style="font-size:.65rem;color:var(--accent);">✉ '+esc(a.email)+'</span>':'')+'</div>'
+      +'<div class="ai-t">'+esc(a.topic)+(a.year?' · '+esc(a.year):'')+expBadge+'</div></div>'
       +badge
-      +'<button class="delbtn" data-aid="'+a.id+'">'
+      +'<button class="delbtn" data-aid="'+Number(a.id)+'">'
       +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg>'
       +'</button></div>';
   }).join('');
@@ -107,10 +124,10 @@ function addCommentBoxes(){
     commentDiv.style.cssText = 'width:100%;padding-top:.5rem;border-top:1px solid var(--border);margin-top:.5rem;';
     commentDiv.innerHTML =
       '<div class="appt-comment' + (appt.comment ? ' has' : '') + '" data-aid="' + aid + '" style="cursor:pointer;font-size:.72rem;">' +
-        (appt.comment ? '💬 ' + appt.comment : '+ Додај коментар') +
+        (appt.comment ? '💬 ' + esc(appt.comment) : '+ Додај коментар') +
       '</div>' +
       '<div class="comment-area" id="ca-' + aid + '">' +
-        '<textarea class="comment-input" rows="2" placeholder="Напомена за студента...">' + (appt.comment || '') + '</textarea>' +
+        '<textarea class="comment-input" rows="2" placeholder="Напомена за студента...">' + esc(appt.comment || '') + '</textarea>' +
         '<button class="comment-save" data-aid="' + aid + '">Сачувај</button>' +
       '</div>';
     card.style.flexWrap = 'wrap';
@@ -135,7 +152,7 @@ function addCommentBoxes(){
 // ── CONFIRM MODAL ─────────────────────────────────────────────────────────────
 function showConfirm(id, studentName, label){
   pendingDeleteId = id;
-  document.getElementById('confirm-msg').innerHTML = 'Откажи термин за <strong>'+studentName+'</strong><br><span style="color:var(--accent);font-size:.8rem;">'+label+'</span>';
+  document.getElementById('confirm-msg').innerHTML = 'Откажи термин за <strong>'+esc(studentName)+'</strong><br><span style="color:var(--accent);font-size:.8rem;">'+esc(label)+'</span>';
   document.getElementById('confirm-modal').classList.add('show');
 }
 function hideConfirm(){
@@ -144,16 +161,7 @@ function hideConfirm(){
 }
 
 // ── БЛОКИРАНИ ДАТУМИ ──────────────────────────────────────────────────────────
-var blockedDates = {}; // { profId: ['2025-06-04', ...] }
-var DB_BLOCKED = 'consultabook/blocked';
-
-function loadBlocked(profId, cb){
-  db.ref(DB_BLOCKED + '/' + profId).once('value', function(snap){
-    blockedDates[profId] = snap.val() ? Object.values(snap.val()) : [];
-    if(cb) cb();
-  });
-}
-
+// blockedDates се пуни из Firebase слушаоца (firebase.js)
 function blockDate(profId, date){
   if(!blockedDates[profId]) blockedDates[profId] = [];
   if(blockedDates[profId].indexOf(date) >= 0){ showToast('err','Датум већ блокиран',''); return; }
@@ -197,8 +205,7 @@ function renderBlockedList(profId){
 function saveComment(apptId, text){
   var appt = appts.find(function(a){ return a.id === apptId; });
   if(!appt) return;
-  text = esc(text);
   appt.comment = text;
-  db.ref('consultabook/appointments/' + String(apptId) + '/comment').set(text);
+  db.ref(DB_REF + '/' + String(apptId) + '/comment').set(text);
   showToast('ok', 'Коментар сачуван', '');
 }

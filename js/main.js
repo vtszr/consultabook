@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('login-btn').addEventListener('click',doLogin);
   document.getElementById('l-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
   document.getElementById('logout-btn').addEventListener('click',doLogout);
+  document.getElementById('purge-btn').addEventListener('click',purgePast);
   document.querySelectorAll('.tpill').forEach(function(b){b.addEventListener('click',function(){ptab(b.dataset.tab,b);});});
   document.getElementById('confirm-yes').addEventListener('click',function(){
     if(pendingDeleteId!==null){

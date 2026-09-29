@@ -46,6 +46,8 @@ function initFirebase(){
     if(loggedProf)renderBlockedList(loggedProf.id);
   },function(e){console.error('blocked:',e.message);});
   auth=firebase.auth();
+  // пријава важи само док је таб отворен (затварањем таба корисник се одјављује)
+  auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(e){console.error('persistence:',e.code);});
   auth.onAuthStateChanged(onAuth);
   // Connection status
   firebase.database().ref('.info/connected').on('value',function(snap){

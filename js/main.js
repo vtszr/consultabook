@@ -9,7 +9,7 @@ function role(r){
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',function(){
-  initFirebase();
+  try{initFirebase();}catch(e){console.error('firebase init:',e);}
   var n=new Date();cy=n.getFullYear();cm_=n.getMonth();
   renderG(professors);
   initTheme();
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('login-btn').addEventListener('click',doLogin);
   document.getElementById('l-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
   document.getElementById('logout-btn').addEventListener('click',doLogout);
-  document.getElementById('purge-btn').addEventListener('click',purgePast);
+  var pb=document.getElementById('purge-btn');if(pb)pb.addEventListener('click',purgePast);
   document.querySelectorAll('.tpill').forEach(function(b){b.addEventListener('click',function(){ptab(b.dataset.tab,b);});});
   document.getElementById('confirm-yes').addEventListener('click',function(){
     if(pendingDeleteId!==null){

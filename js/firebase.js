@@ -49,11 +49,13 @@ function initFirebase(){
   // подразумевано пријава важи само док је таб отворен; "Запамти ме" је чува и после затварања
   setRemember(getRemember());
   var cb=document.getElementById('remember-cb');
-  cb.checked=getRemember();
-  cb.addEventListener('change',function(){
-    try{localStorage.setItem('vtszr_remember',cb.checked?'1':'0');}catch(e){}
-    setRemember(cb.checked);
-  });
+  if(cb){
+    cb.checked=getRemember();
+    cb.addEventListener('change',function(){
+      try{localStorage.setItem('vtszr_remember',cb.checked?'1':'0');}catch(e){}
+      setRemember(cb.checked);
+    });
+  }
   auth.onAuthStateChanged(onAuth);
   // Connection status
   firebase.database().ref('.info/connected').on('value',function(snap){
@@ -103,7 +105,7 @@ function onAuth(user){
   // без "Запамти ме": ако пријава потиче из ранијег таба, одјави корисника
   if(user&&!getRemember()&&!hasSession()){auth.signOut();return;}
   var btn=document.getElementById('auth-btn');
-  document.getElementById('remember-wrap').style.display=user?'none':'';
+  var rw=document.getElementById('remember-wrap');if(rw)rw.style.display=user?'none':'';
   if(apptRef){apptRef.off();apptRef=null;}
   appts=[];loggedProf=null;
   document.getElementById('p-portal').style.display='none';

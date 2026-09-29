@@ -32,29 +32,15 @@ function showPortal(){
   document.getElementById('portal-subj').textContent = shortSubj + (shortSubj ? ' · ' : '') + p.office;
   renderStats(p.id);renderAppts(p.id,ptab_);
   renderBlockedList(p.id);
-  document.getElementById('auth-btn').style.display='none'; // наставник се одјављује дугметом у порталу
   var btn=document.getElementById('block-btn');
   if(btn&&!btn._wired){
     btn._wired=true;
-    fillTimeSelect('block-from','Од');fillTimeSelect('block-to','До');
-    var bd=document.getElementById('block-date');
-    bd.addEventListener('click',function(){try{bd.showPicker();}catch(e){}});
     btn.addEventListener('click',function(){
       var d=document.getElementById('block-date').value;
-      var from=document.getElementById('block-from').value;
-      var to=document.getElementById('block-to').value;
       if(!d){ showToast('err','Одабери датум',''); return; }
-      if(!from!==!to){ showToast('err','Унеси оба времена','Попуни и „од“ и „до“, или оба остави празна за цео дан.'); return; }
-      if(from&&from>=to){ showToast('err','Погрешно време','Време „до“ мора бити после времена „од“.'); return; }
-      blockDate(loggedProf.id,d,from,to);
+      blockDate(loggedProf.id,d);
     });
   }
-}
-// Падајућа листа времена (24 сата, корак 30 мин)
-function fillTimeSelect(id,placeholder){
-  var s=document.getElementById(id),h='<option value="">'+placeholder+'</option>';
-  for(var m=7*60;m<=21*60;m+=30)h+='<option value="'+pad(Math.floor(m/60))+':'+pad(m%60)+'">'+pad(Math.floor(m/60))+':'+pad(m%60)+'</option>';
-  s.innerHTML=h;
 }
 function renderStats(id){
   var all=appts.filter(function(a){return a.pid===id;}),
@@ -183,19 +169,15 @@ function hideConfirm(){
 
 // ── БЛОКИРАНИ ДАТУМИ ──────────────────────────────────────────────────────────
 // blockedDates се пуни из Firebase слушаоца (firebase.js)
-// Запис: 'ГГГГ-ММ-ДД' (цео дан) или 'ГГГГ-ММ-ДД|ЧЧ:ММ-ЧЧ:ММ' (само део дана)
-function blockDate(profId, date, from, to){
-  var entry = from ? date + '|' + from + '-' + to : date;
+function blockDate(profId, date){
   if(!blockedDates[profId]) blockedDates[profId] = [];
-  if(blockedDates[profId].indexOf(entry) >= 0){ showToast('err','Већ блокирано',''); return; }
-  blockedDates[profId].push(entry);
+  if(blockedDates[profId].indexOf(date) >= 0){ showToast('err','Датум већ блокиран',''); return; }
+  blockedDates[profId].push(date);
   db.ref(DB_BLOCKED + '/' + profId).set(blockedDates[profId]);
   renderBlockedList(profId);
   renderAppts(profId, ptab_);
-  var n=appts.filter(function(a){
-    return a.pid===profId&&a.date===date&&(!from||(a.time>=from&&a.time<to));
-  }).length;
-  showToast('ok', from?'Време блокирано':'Датум блокиран', n?('Већ заказано термина: '+n+'. Откажите их ручно.'):(from?from+' – '+to:date));
+  var n=appts.filter(function(a){return a.pid===profId&&a.date===date;}).length;
+  showToast('ok','Датум блокиран', n?('Већ заказано термина тог дана: '+n+'. Откажите их ручно.'):date);
 }
 
 function unblockDate(profId, date){
@@ -206,19 +188,8 @@ function unblockDate(profId, date){
   showToast('ok','Блокада уклоњена', date);
 }
 
-// цео дан блокиран
 function isDateBlocked(profId, dateKey){
   return blockedDates[profId] && blockedDates[profId].indexOf(dateKey) >= 0;
-}
-// термин [start,end) се преклапа са блокираним временом тог дана
-function isSlotBlocked(profId, dateKey, start, end){
-  var list = blockedDates[profId] || [];
-  return list.some(function(e){
-    var p = e.split('|');
-    if(p[0] !== dateKey || !p[1]) return false;
-    var r = p[1].split('-');
-    return start < r[1] && end > r[0];
-  });
 }
 
 function renderBlockedList(profId){
@@ -228,11 +199,9 @@ function renderBlockedList(profId){
   if(!dates.length){ L.innerHTML = '<p style="font-size:.75rem;color:var(--text3);">Нема блокираних датума.</p>'; return; }
   dates.sort();
   L.innerHTML = dates.map(function(d){
-    var parts = d.split('|');
-    var dobj = new Date(parts[0] + 'T00:00:00');
+    var dobj = new Date(d + 'T00:00:00');
     var dstr = dobj.toLocaleDateString('sr-Latn-RS',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-    var when = parts[1] ? ' · ' + esc(parts[1].replace('-',' – ')) : ' · цео дан';
-    return '<div class="blocked-item"><span><strong>' + dstr + '</strong>' + when + '</span><button class="unblock-btn" data-date="' + esc(d) + '">Уклони ✕</button></div>';
+    return '<div class="blocked-item"><span><strong>' + dstr + '</strong></span><button class="unblock-btn" data-date="' + d + '">Уклони ✕</button></div>';
   }).join('');
   L.querySelectorAll('.unblock-btn').forEach(function(b){
     b.addEventListener('click', function(){ unblockDate(profId, b.dataset.date); });

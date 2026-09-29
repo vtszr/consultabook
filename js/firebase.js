@@ -28,13 +28,11 @@ function initFirebase(){
     }
     if(loggedProf){ renderStats(loggedProf.id); renderAppts(loggedProf.id,ptab_); }
     if(document.getElementById('pg-m').classList.contains('on')) searchMyAppts();
-    if(currentView==='week') renderWeek();
   },function(e){console.error('appointments:',e.message);});
   };
   db.ref('consultabook/slots').on('value',function(snap){
     takenSlots=snap.val()||{};
     if(sp&&document.getElementById('vbook').classList.contains('on')){renderCal();renderSlots();}
-    if(currentView==='week')renderWeek();
   });
   // Блокирани датуми — потребни и студентима (календар), не само наставнику
   db.ref(DB_BLOCKED).on('value',function(snap){
@@ -42,12 +40,15 @@ function initFirebase(){
     blockedDates={};
     Object.keys(v).forEach(function(pid){blockedDates[pid]=Object.values(v[pid]||{});});
     if(sp&&document.getElementById('vbook').classList.contains('on')){renderCal();renderSlots();}
-    if(currentView==='week')renderWeek();
     if(loggedProf)renderBlockedList(loggedProf.id);
   },function(e){console.error('blocked:',e.message);});
   auth=firebase.auth();
   // подразумевано пријава важи само док је таб отворен; "Запамти ме" је чува и после затварања
-  setRemember(getRemember());
+  setRemember(getKeep());
+  var pcb=document.getElementById('remember-prof');
+  if(pcb){
+    try{pcb.checked=localStorage.getItem('vtszr_remember_prof')==='1';}catch(e){}
+  }
   var cb=document.getElementById('remember-cb');
   if(cb){
     cb.checked=getRemember();
@@ -73,6 +74,9 @@ function initFirebase(){
 }
 
 function getRemember(){try{return localStorage.getItem('vtszr_remember')==='1';}catch(e){return false;}}
+// "Запамти ме" за последњу пријаву (студент или наставник)
+function getKeep(){try{return localStorage.getItem('vtszr_keep')==='1';}catch(e){return false;}}
+function setKeep(on){try{localStorage.setItem('vtszr_keep',on?'1':'0');}catch(e){}}
 function setRemember(on){
   var P=firebase.auth.Auth.Persistence;
   return auth.setPersistence(on?P.LOCAL:P.SESSION).catch(function(e){console.error('persistence:',e.code);});
@@ -103,7 +107,7 @@ function markSession(){try{sessionStorage.setItem('vtszr_active','1');}catch(e){
 function hasSession(){try{return sessionStorage.getItem('vtszr_active')==='1';}catch(e){return true;}}
 function onAuth(user){
   // без "Запамти ме": ако пријава потиче из ранијег таба, одјави корисника
-  if(user&&!getRemember()&&!hasSession()){auth.signOut();return;}
+  if(user&&!getKeep()&&!hasSession()){auth.signOut();return;}
   var btn=document.getElementById('auth-btn');
   var rw=document.getElementById('remember-wrap');if(rw)rw.style.display=user?'none':'';
   if(apptRef){apptRef.off();apptRef=null;}
@@ -139,6 +143,8 @@ document.addEventListener('DOMContentLoaded',function(){
     if(signingIn)return;
     signingIn=true;
     markSession();
+    var scb=document.getElementById('remember-cb');
+    setKeep(!!(scb&&scb.checked));
     auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){
       // затварање прозора и двоструки клик нису праве грешке
       if(e.code==='auth/popup-closed-by-user'||e.code==='auth/cancelled-popup-request')return;

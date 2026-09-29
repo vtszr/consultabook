@@ -8,8 +8,11 @@ function doLogin(){
   err.classList.remove('on');
   pendingProfLogin=true;
   markSession();
-  // наставници се увек пријављују само за време трајања таба
-  auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).then(function(){
+  var pcb=document.getElementById('remember-prof'),keep=!!(pcb&&pcb.checked);
+  try{localStorage.setItem('vtszr_remember_prof',keep?'1':'0');}catch(e){}
+  setKeep(keep);
+  var P=firebase.auth.Auth.Persistence;
+  auth.setPersistence(keep?P.LOCAL:P.SESSION).then(function(){
     return auth.signInWithEmailAndPassword(email,pass);
   }).catch(function(){
     pendingProfLogin=false;err.classList.add('on');document.getElementById('l-pass').value='';

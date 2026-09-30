@@ -14,8 +14,13 @@ function doLogin(){
   var P=firebase.auth.Auth.Persistence;
   auth.setPersistence(keep?P.LOCAL:P.SESSION).then(function(){
     return auth.signInWithEmailAndPassword(email,pass);
-  }).catch(function(){
-    pendingProfLogin=false;err.classList.add('on');document.getElementById('l-pass').value='';
+  }).catch(function(e){
+    var code=e&&e.code;
+    pendingProfLogin=false;
+    err.textContent=code==='auth/network-request-failed'?'Нема интернет везе.':
+                    code==='auth/too-many-requests'?'Превише покушаја. Покушајте касније.':
+                    'Погрешан мејл или лозинка.';
+    err.classList.add('on');document.getElementById('l-pass').value='';
   });
 }
 function doLogout(){

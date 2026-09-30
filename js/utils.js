@@ -39,7 +39,9 @@ function showToast(type,title,sub){
   var c=document.getElementById('tc'),el=document.createElement('div');
   el.className='toast '+type;
   var icon=type==='ok'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-  el.innerHTML='<div class="ti">'+icon+'</div><div><div class="tt">'+title+'</div><div class="ts">'+sub+'</div></div>';
+  el.innerHTML='<div class="ti">'+icon+'</div><div><div class="tt"></div><div class="ts"></div></div>';
+  el.querySelector('.tt').textContent=title;
+  el.querySelector('.ts').textContent=sub;
   c.appendChild(el);setTimeout(function(){el.remove();},4000);
 }
 

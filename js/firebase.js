@@ -83,16 +83,15 @@ function setRemember(on){
 }
 
 function saveApptToFirebase(appt){
-  db.ref(DB_REF+'/'+String(appt.id)).set(appt);
+  return db.ref(DB_REF+'/'+String(appt.id)).set(appt);
 }
 function deleteApptFromFirebase(id){
-  var r=db.ref(DB_REF+'/'+String(id));
-  r.once('value',function(snap){
+  return db.ref(DB_REF+'/'+String(id)).once('value').then(function(snap){
     var a=snap.val();
     var upd={};
     upd[DB_REF+'/'+String(id)]=null;
     if(a&&a.lock) upd['consultabook/slots/'+a.lock]=null;
-    db.ref().update(upd);
+    return db.ref().update(upd);
   });
 }
 

@@ -239,8 +239,7 @@ function confirmBook(){
   appt.lock=lockKey;
   appt.uid=auth.currentUser.uid;
   var finish=function(){
-  appts.push(appt);
-  saveApptToFirebase(appt);
+  if(!appts.some(function(a){return a.id===appt.id;}))appts.push(appt);
   var start=new Date(appt.date+'T'+sl.time+':00');
   var es=sl.label.split('–')[1].trim().split(':').map(Number);
   var end=new Date(appt.date+'T'+pad(es[0])+':'+pad(es[1]||0)+':00');
@@ -267,7 +266,13 @@ function confirmBook(){
   document.getElementById('cbtn').disabled=true;
   db.ref('consultabook/slots/'+lockKey).transaction(function(cur){return cur===null?auth.currentUser.uid:undefined;},function(err,ok){
     if(err||!ok){showToast('err','Термин заузет','Неко је управо резервисао овај термин.');renderSlots();chk();return;}
-    finish();
+    saveApptToFirebase(appt).then(finish,function(){
+      // упис термина није успео: ослободи браву и врати стање
+      db.ref('consultabook/slots/'+lockKey).remove();
+      appts=appts.filter(function(a){return a.id!==appt.id;});
+      showToast('err','Резервација није сачувана','Покушајте поново.');
+      renderSlots();chk();
+    });
   });
 }
 

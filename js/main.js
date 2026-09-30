@@ -34,12 +34,16 @@ document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.tpill').forEach(function(b){b.addEventListener('click',function(){ptab(b.dataset.tab,b);});});
   document.getElementById('confirm-yes').addEventListener('click',function(){
     if(pendingDeleteId!==null){
-      appts=appts.filter(function(a){return a.id!==pendingDeleteId;});
-      deleteApptFromFirebase(pendingDeleteId);
-      showToast('ok','Термин је отказан','');
-      if(loggedProf){renderStats(loggedProf.id);renderAppts(loggedProf.id,ptab_);}
-      if(pendingMyrIdx){searchMyAppts();}
+      var delId=pendingDeleteId,fromMyr=pendingMyrIdx;
       pendingMyrIdx=null;
+      deleteApptFromFirebase(delId).then(function(){
+        appts=appts.filter(function(a){return a.id!==delId;});
+        showToast('ok','Термин је отказан','');
+        if(loggedProf){renderStats(loggedProf.id);renderAppts(loggedProf.id,ptab_);}
+        if(fromMyr){searchMyAppts();}
+      },function(){
+        showToast('err','Отказивање није успело','Проверите интернет везу.');
+      });
     }
     hideConfirm();
   });

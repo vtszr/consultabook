@@ -61,6 +61,7 @@ function initFirebase(){
   // Connection status
   firebase.database().ref('.info/connected').on('value',function(snap){
     var dot=document.getElementById('fb-dot'),label=document.getElementById('fb-label');
+    fbOnline=snap.val()===true;
     if(!dot||!label)return;
     if(snap.val()===true){
       dot.style.background='var(--success)';label.textContent='Онлајн';label.style.color='var(--success)';

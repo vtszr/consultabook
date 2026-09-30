@@ -231,8 +231,6 @@ body.light .fg select option{background:#fff;}
 .dept-title{font-family:'Orbitron','Exo 2',sans-serif;font-size:.82rem;font-weight:700;color:var(--text);}
 .dept-count{font-size:.72rem;color:var(--text3);margin-left:auto;}
 .dept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.65rem;}
-/*.mailbtn{width:100%;padding:.6rem;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--rsm);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;transition:all .2s;margin-top:.45rem;pointer-events:all;cursor:pointer;user-select:none;}
-.mailbtn:hover{border-color:var(--accent);color:var(--accent);}
 
 
 .exp-badge{display:inline-flex;align-items:center;gap:4px;padding:1px 6px;border-radius:20px;font-size:.62rem;font-weight:800;background:rgba(244,63,94,0.1);color:var(--danger);text-transform:uppercase;letter-spacing:.3px;margin-left:4px;}
@@ -319,7 +317,7 @@ body.light .fg select option{background:#fff;}
   .fg label{font-size:.65rem;}
   .fg input,.fg textarea,.fg select{font-size:.82rem;padding:.5rem .72rem;}
   .cbtn{font-size:.85rem;padding:.7rem;}
-  .gcalbtn,/*.mailbtn{font-size:.78rem;padding:.55rem;}
+  .gcalbtn{font-size:.78rem;padding:.55rem;}
 
   /* Confirmation card */
   .conf-card{padding:.85rem;}
@@ -367,12 +365,6 @@ body.light .fg select option{background:#fff;}
   .dayfilt{display:none;} /* Hide day filter on very small screens */
 }
 
-.toast-undo{display:flex;align-items:center;gap:10px;padding:.8rem .95rem;background:var(--card);border:1px solid rgba(244,63,94,0.3);border-radius:var(--r);box-shadow:var(--sh);animation:si .28s ease;min-width:260px;}
-.undo-btn{margin-left:auto;padding:.3rem .8rem;background:var(--danger);color:#fff;border:none;border-radius:var(--rxs);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;cursor:pointer;transition:opacity .2s;white-space:nowrap;flex-shrink:0;}
-.undo-btn:hover{opacity:.85;}
-.undo-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--danger);border-radius:0 0 var(--r) var(--r);animation:undo-shrink 5s linear forwards;}
-@keyframes undo-shrink{from{width:100%}to{width:0%}}
-.toast-undo{position:relative;overflow:hidden;}
 
 /* CONFIRM MODAL */
 #confirm-modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9000;display:none;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);}
@@ -395,17 +387,12 @@ body.light .fg select option{background:#fff;}
 a{pointer-events:all !important;cursor:pointer;}
 input,textarea{user-select:text;-webkit-user-select:text;}
 body{cursor:default;}
-button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.cday.av,.sbtn,.mailbtn,.gcalbtn{cursor:pointer;}
+button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.cday.av,.sbtn,.gcalbtn{cursor:pointer;}
 .cday.dis{cursor:not-allowed;}
 .sbtn.bkd{cursor:not-allowed;}
 
 /* МОЈЕ РЕЗЕРВАЦИЈЕ */
 .myr-wrap{max-width:600px;margin:0 auto;}
-.myr-search{display:flex;gap:.65rem;margin-bottom:1.5rem;}
-.myr-search input{flex:1;padding:.65rem .9rem;background:var(--card);border:1px solid var(--border);border-radius:var(--rsm);color:var(--text);font-family:'Nunito',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;}
-.myr-search input:focus{border-color:var(--accent);}
-.myr-search button{padding:.65rem 1.25rem;background:var(--accent);color:#0f1420;border:none;border-radius:var(--rsm);font-family:'Nunito',sans-serif;font-size:.875rem;font-weight:800;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
-.myr-search button:hover{opacity:.9;}
 .myr-empty{text-align:center;padding:2.5rem;color:var(--text3);font-size:.875rem;}
 .myr-count{font-size:.78rem;color:var(--text3);margin-bottom:.85rem;}
 .myr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rsm);padding:.9rem 1.1rem;display:flex;align-items:center;gap:.85rem;margin-bottom:.55rem;transition:border-color .18s;}
@@ -421,7 +408,6 @@ button,.pcard,.fbtn,.rbtn,.vtbtn,.tpill,.delbtn,.backbtn,.cday.av,.sbtn,.mailbtn
 .myr-topic{font-size:.72rem;color:var(--text2);margin-top:2px;}
 .myr-cancel{background:none;border:1px solid var(--border);color:var(--text3);cursor:pointer;padding:.35rem .75rem;border-radius:var(--rxs);font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;transition:all .18s;white-space:nowrap;flex-shrink:0;}
 .myr-cancel:hover{border-color:var(--danger);color:var(--danger);}
-.myr-cancel.past-btn{display:none;}
 
 /* CONFETTI */
 .confetti-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;}
@@ -467,5 +453,3 @@ body.light .block-row input[type=date]{color-scheme:light;}
 
 .cday.holiday{color:var(--danger)!important;opacity:.4;}
 
-.appt-gcal{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:1px solid var(--border);color:var(--text3);text-decoration:none;transition:all .18s;flex-shrink:0;pointer-events:all;cursor:pointer;}
-.appt-gcal:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow);}

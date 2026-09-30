@@ -263,6 +263,7 @@ function confirmBook(){
   ['fd','fy'].forEach(function(i){document.getElementById(i).value='';});
   if(loggedProf&&loggedProf.id===sp.id){renderStats(loggedProf.id);renderAppts(loggedProf.id,ptab_);}
   };
+  if(!fbOnline){showToast('err','Нема везе са базом','Проверите интернет и покушајте поново.');return;}
   document.getElementById('cbtn').disabled=true;
   db.ref('consultabook/slots/'+lockKey).transaction(function(cur){return cur===null?auth.currentUser.uid:undefined;},function(err,ok){
     if(err||!ok){showToast('err','Термин заузет','Неко је управо резервисао овај термин.');renderSlots();chk();return;}

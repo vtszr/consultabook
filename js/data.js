@@ -17,6 +17,7 @@ var MAX_ACTIVE = 3;   // највише активних термина по с�
 var CANCEL_HOURS = 2; // отказивање најкасније X сати пре почетка
 var db, auth, takenSlots={}, attachAppts, apptRef=null, pendingProfLogin=false;
 var signingIn = false;
+var fbOnline = true; // стање везе са базом (.info/connected), поставља га слушалац у firebase.js
 var DB_BLOCKED ='consultabook/blocked';
 var blockedDates = {}; // { profId: ['2025-06-04', ...] }
 var pendingMyrIdx = null;

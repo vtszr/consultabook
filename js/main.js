@@ -33,7 +33,9 @@ document.addEventListener('DOMContentLoaded',function(){
   var pb=document.getElementById('purge-btn');if(pb)pb.addEventListener('click',purgePast);
   document.querySelectorAll('.tpill').forEach(function(b){b.addEventListener('click',function(){ptab(b.dataset.tab,b);});});
   document.getElementById('confirm-yes').addEventListener('click',function(){
-    if(pendingDeleteId!==null){
+    if(pendingDeleteId!==null&&!fbOnline){
+      showToast('err','Нема везе са базом','Проверите интернет и покушајте поново.');
+    } else if(pendingDeleteId!==null){
       var delId=pendingDeleteId,fromMyr=pendingMyrIdx;
       pendingMyrIdx=null;
       deleteApptFromFirebase(delId).then(function(){
